@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<fxpProperties abbreviated="false" authoringTool="Flex Builder" compiles="true" parentProject="058b0ea6-46e7-4933-b16d-322f228a5620" projectUUID="058b0ea6-46e7-4933-b16d-322f228a5620" sdkVersion="4.1.0" uuid="ee798f4a-8685-4df1-8414-652a2874c41b" version="4">
+  <projects/>
+  <src/>
+  <swc>
+    <linked location="sdkPlaceHolder" path="sdkPlaceHolder" position="0" uuid="ee798f4a-8685-4df1-8414-652a2874c41b"/>
+    <linked location="D:/Works/FlashAS3Lib/mikechambers-as3corelib-c99a4ea.swc" path="/linked-swc/mikechambers-as3corelib-c99a4ea.swc" position="1" uuid="ee798f4a-8685-4df1-8414-652a2874c41b"/>
+    <linked location="D:/Works/FlashAS3Lib/RedDebug.swc" path="/linked-swc/RedDebug.swc" position="2" uuid="ee798f4a-8685-4df1-8414-652a2874c41b"/>
+    <linked location="D:/Works/FlashAS3Lib/TweenLite.swc" path="/linked-swc/TweenLite.swc" position="3" uuid="ee798f4a-8685-4df1-8414-652a2874c41b"/>
+  </swc>
+  <misc/>
+  <theme/>
+</fxpProperties>
