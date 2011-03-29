@@ -1,0 +1,80 @@
+<project name="Flex Ant Tasks Build Script" default="compile flex ant tasks project">
+ 
+	<!-- load previously defined configuration properties file -->
+	<property file="build.properties" />
+	
+	<!-- points to our flexTasks.jar we copied to the libs folder to distribute with the project -->
+	<taskdef resource="flexTasks.tasks" classpath="${basedir}/libs/flexTasks.jar"/> 
+	
+	<target name="compile flex ant tasks project" depends="init, build doc, copyRSLs, wrapper, createSWC" />	
+	
+	<!-- delete and recreate the DEPLOY and DOC dirs -->
+	<target name="init">
+		<delete dir="${DEPLOY_DIR}" />
+		<mkdir dir="${DEPLOY_DIR}" />	
+		
+		<delete dir="${DOC_DIR}" />
+		<mkdir dir="${DOC_DIR}" />
+	</target>
+
+	<!-- ASDoc creation -->
+	<target name="build doc" depends="init">
+		<exec executable="${asdoc.exe}" failonerror="true">
+			<arg line='-doc-sources ${SRC_DIR}' />
+			<arg line='-external-library-path ${LIBS_DIR}' />
+			<arg line='-warn-level-not-supported=false'/>
+			<arg line='-main-title ${DOC_TITLE}' />
+			<arg line='-window-title ${DOC_TITLE}' />
+			<arg line='-footer ${DOC_FOOTER}' />
+			<arg line='-output ${DOC_DIR}' />
+		</exec>
+	</target>
+	
+	<!-- Build and output the Main.swf-->
+	<target name="compile flex project" depends="init">
+		<mxmlc file="${SRC_DIR}/Main.mxml" output="${DEPLOY_DIR}/Main.swf">
+	        <load-config filename="${FLEX_HOME}/frameworks/flex-config.xml"/>
+	        <source-path path-element="${FLEX_HOME}/frameworks"/>
+			<compiler.debug>false</compiler.debug>
+			
+			<runtime-shared-library-path
+				path-element="${FLEX_FRAMEWORK}/framework.swc">
+				<url rsl-url="framework_4.1.0.16076.swf"/>
+				<url rsl-url="framework_4.1.0.16076.swz"/>
+			</runtime-shared-library-path>			
+			
+		</mxmlc>
+	</target>
+	
+	<!-- HTML Wrapper -->
+	<target name="wrapper">
+        <html-wrapper 
+            title="Flex Ant Tasks Part II"
+            file="flext_ant_pt_II_tasks.html"
+            height="500"
+            width="500"
+            bgcolor="#000000"
+            application="Main"
+            swf="Main"
+            version-major="9"
+            version-minor="0"
+            version-revision="0"
+            history="true"
+            output="${DEPLOY_DIR}"/>
+	</target>
+	
+	<!-- create SWC -->
+	<target name="createSWC">
+		<compc 
+	        output="${DEPLOY_DIR}/MyComps.swc" include-classes="xBei.Net.Uri">
+	        <source-path path-element="${SRC_DIR}"/>
+		</compc>
+	</target>
+	
+	<!-- copy only the Flex Framework files into the DEPLOY_DIR to use for RSLs --> 	
+	<target name="copyRSLs">
+		<copy todir="${DEPLOY_DIR}" file="${FLEX_HOME}/frameworks/rsls/framework_4.1.0.16076.swf"/>
+		<copy todir="${DEPLOY_DIR}" file="${FLEX_HOME}/frameworks/rsls/framework_4.1.0.16076.swz"/>		
+	</target>	
+</project>
+

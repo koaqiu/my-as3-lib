@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<flexLibProperties includeAllClasses="true" version="3">
+  <includeClasses>
+    <classEntry path="xBei.Helper.ImageHelper"/>
+    <classEntry path="xBei.Helper.KeyHelper"/>
+    <classEntry path="xBei.Helper.StringHelper"/>
+    <classEntry path="xBei.Manager.CursorManager"/>
+    <classEntry path="xBei.Net.DataLoader"/>
+    <classEntry path="xBei.Net.Events.DataLoaderEvent"/>
+    <classEntry path="xBei.Net.JSONLoader"/>
+    <classEntry path="xBei.Net.RequestQueryString"/>
+    <classEntry path="xBei.Net.Uri"/>
+    <classEntry path="com.CGFinal.Controls.NumberLineSilder"/>
+    <classEntry path="com.CGFinal.Controls.TextBox"/>
+    <classEntry path="com.CGFinal.Controls.LineSilder"/>
+    <classEntry path="xBei.Manager.PopUpManager"/>
+    <classEntry path="xBei.Interface.IPopupObject"/>
+    <classEntry path="xBei.Manager.PopupWindowManager"/>
+    <classEntry path="xBei.Manager.HotKeyManager"/>
+    <classEntry path="net.hires.debug.Stats"/>
+    <classEntry path="net.hires.debug.Logger"/>
+    <classEntry path="xBei.Web.Document"/>
+    <classEntry path="xBei.Web.Data.BasicAppConfig"/>
+    <classEntry path="xBei.Manager.DepthManger"/>
+    <classEntry path="xBei.Interface.IChildSprite"/>
+    <classEntry path="xBei.Interface.IFont"/>
+    <classEntry path="xBei.Fonts.FontStyles"/>
+    <classEntry path="xBei.Helper.MathHelper"/>
+    <classEntry path="xBei.Interface.IDispose"/>
+    <classEntry path="xBei.Helper.XmlHelper"/>
+    <classEntry path="xBei.AnimationMode"/>
+  </includeClasses>
+  <includeResources/>
+  <namespaceManifests/>
+</flexLibProperties>
