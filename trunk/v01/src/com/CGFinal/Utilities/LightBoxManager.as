@@ -1,20 +1,19 @@
 ﻿package com.CGFinal.Utilities {
-	import flash.display.Graphics;
-	import flash.display.Sprite;
-	import flash.display.Stage;
-	import flash.events.MouseEvent;
-	import flash.events.TimerEvent;
+	import flash.display.*;
+	import flash.events.*;
 	import flash.geom.Rectangle;
 	import flash.utils.Timer;
 	
 	import gs.TweenLite;
 	
 	/**
-	 * ...
+	 * 模式窗口管理
 	 * @author KoaQiu
 	 */
 	public class LightBoxManager {
 		private static var _curWin:LBWin;
+		private static var _winList:Vector.<LBWin>;
+		
 		private static var _showing:Boolean = false;
 		public static function get Showing():Boolean {
 			return LightBoxManager._showing;
@@ -59,13 +58,19 @@
 			}
 			
 			LightBoxManager._initArgs = _args;
+			LightBoxManager._winList = new Vector.<LBWin>();
 		}
 		/**
-		 * 显示窗口
+		 * 显示一个模式窗口
 		 * @param	win
 		 */
 		internal static function ShowWin(win:LBWin):void {
-			_curWin = win;
+			var index:int = LightBoxManager._winList.indexOf(win);
+			if(index >= 0){
+				LightBoxManager._winList.splice(index, 1);
+			}
+			LightBoxManager._winList.push(win);
+			LightBoxManager._curWin = win;
 			try{
 				HotKeyManager.Instance.Enabled = false;
 			}catch(error:Error){}
@@ -198,7 +203,12 @@
 		 * 隐藏窗口
 		 */
 		public static function Hide():void {
-			if (_curWin == null) return;
+			if(LightBoxManager._winList.length > 0){
+				_curWin = LightBoxManager._winList[LightBoxManager._winList.length - 1];
+			}else{
+				return;
+			}
+			trace('lightbox hide', _curWin.canClose)
 			if (!_curWin.canClose) {
 				return;
 			}
@@ -267,6 +277,7 @@
 								}
 								ppWin.dispose();
 							}
+							LightBoxManager._winList.pop();
 						}
 					} );
 					//窗口恢复原始状态
