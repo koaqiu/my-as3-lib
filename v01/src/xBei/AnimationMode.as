@@ -3,7 +3,6 @@ package xBei {
 	/**
 	 * 动画模式
 	 * @author KoaQiu
-	 * 
 	 */
 	public final class AnimationMode {
 		/**
@@ -21,6 +20,6 @@ package xBei {
 		/**
 		 * 闪白
 		 */
-		public static const FLASH_WHITE:int = 1;
+		public static const FLASH_WHITE:int = 2;
 	}
 }
