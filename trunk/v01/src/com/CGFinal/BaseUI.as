@@ -1,7 +1,4 @@
 ﻿package com.CGFinal {
-	import com.CGFinal.DragAndDrop.DragItem;
-	import com.CGFinal.Events.DragDropEvent;
-	
 	import flash.display.*;
 	import flash.events.*;
 	import flash.geom.*;
@@ -12,11 +9,13 @@
 	import gs.TweenLite;
 	
 	import xBei.AnimationMode;
+	import xBei.Events.DragDropEvent;
 	import xBei.Helper.StringHelper;
 	import xBei.Interface.*;
 	import xBei.Manager.DragManager;
 	import xBei.Net.RequestQueryString;
 	import xBei.Net.Uri;
+	import xBei.UI.DragItem;
 
 	
 	/**
@@ -173,7 +172,6 @@
 		 * @param callBack		为空时返回所有对象，并且忽略thisObject 
 		 * function(disp,index):Boolean;
 		 * @param thisObject
-		 * 
 		 */
 		public function ChildrenFilter(callBack:Function = null,thisObject:* = null):Array{
 			var list:Array = [];

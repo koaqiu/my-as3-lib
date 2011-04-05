@@ -1,11 +1,10 @@
 ﻿package xBei.Manager {
-	import com.CGFinal.DragAndDrop.DragItem;
-	import flash.display.DisplayObject;
-	import flash.display.Graphics;
-	import flash.display.Sprite;
-	import flash.display.Stage;
-	import flash.events.MouseEvent;
-	import flash.geom.Point;
+	import flash.display.*;
+	import flash.events.*;
+	import flash.geom.*;
+	
+	import xBei.UI.DragItem;
+
 	/**
 	 * 拖曳管理器
 	 * @author KoaQiu
