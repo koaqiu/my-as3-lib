@@ -1,12 +1,11 @@
 ﻿package {
-	import flash.display.MovieClip;
-	import flash.events.Event;
-	import flash.events.TimerEvent;
-	import flash.net.URLRequest;
-	import flash.net.navigateToURL;
+	import flash.display.*;
+	import flash.events.*;
+	import flash.net.*;
 	import flash.system.Capabilities;
-	import flash.utils.Timer;
-	import flash.utils.getDefinitionByName;
+	import flash.utils.*;
+	
+	import xBei.Interface.IDispose;
 
 	/**
 	 * 用于实现全局数据共享
@@ -90,6 +89,22 @@
 				navigateToURL(new URLRequest(cmdl));
 			}else{
 				trace('glo.CommandDir:',cmdl);
+			}
+		}
+		/**
+		 * 销毁可视对象
+		 * @param item
+		 */
+		public static function DisposeDisplayObject(item:*):void{
+			if(item is Loader){
+				(item as Loader).unloadAndStop();
+			}
+			if(item is IDispose){
+				(item as IDispose).dispose();
+			}else if(item.hasOwnProperty('dispose')){
+				try{
+					item['dispose']();
+				}catch(err:Error){}
 			}
 		}
 		/**

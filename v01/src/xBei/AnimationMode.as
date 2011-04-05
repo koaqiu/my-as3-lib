@@ -6,19 +6,19 @@ package xBei {
 	 */
 	public final class AnimationMode {
 		/**
-		 * 直接
+		 * 直接（0）
 		 */
-		public static const DIRECT:int = 0;
+		public static const DIRECT:int      = 0;
 		/**
-		 * 渐显
+		 * 渐显（1）
 		 */
-		public static const FADE_IN:int = 1;
+		public static const FADE_IN:int     = 1;
 		/**
-		 * 渐出
+		 * 渐出（1）
 		 */
-		public static const FADE_OUT:int = 1;
+		public static const FADE_OUT:int    = 1;
 		/**
-		 * 闪白
+		 * 闪白（2）
 		 */
 		public static const FLASH_WHITE:int = 2;
 	}
