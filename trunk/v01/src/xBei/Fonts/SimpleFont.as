@@ -1,20 +1,10 @@
 ﻿package xBei.Fonts {
-	import flash.display.Loader;
-	import flash.display.LoaderInfo;
-	import flash.display.Sprite;
-	import flash.events.ErrorEvent;
-	import flash.events.Event;
-	import flash.events.EventDispatcher;
-	import flash.events.HTTPStatusEvent;
-	import flash.events.IOErrorEvent;
-	import flash.events.ProgressEvent;
+	import flash.display.*;
+	import flash.events.*;
 	import flash.net.URLRequest;
-	import flash.system.ApplicationDomain;
-	import flash.system.LoaderContext;
-	import flash.system.SecurityDomain;
+	import flash.system.*;
 	import flash.text.TextField;
-	import flash.utils.getDefinitionByName;
-	import flash.utils.getQualifiedClassName;
+	import flash.utils.*;
 	
 	import xBei.Interface.IFont;
 	
@@ -64,8 +54,7 @@
 			_loader.contentLoaderInfo.addEventListener(ProgressEvent.PROGRESS, onLoadProgress);
 			_loader.contentLoaderInfo.addEventListener(Event.COMPLETE, onFontsLoad);
 			_downloading = true;
-			var context:LoaderContext = new LoaderContext();
-			context.checkPolicyFile = false;
+			var context:LoaderContext = new LoaderContext(true);
 			if(glo.bal.IsLocal == false){
 				context.securityDomain = SecurityDomain.currentDomain;
 			}

@@ -32,6 +32,13 @@
     <classEntry path="xBei.UI.XSprite"/>
     <classEntry path="xBei.UI.XMovieClip"/>
     <classEntry path="xBei.Interface.IEnabled"/>
+    <classEntry path="xBei.UI.LiteComponent"/>
+    <classEntry path="xBei.UI.SkinItem"/>
+    <classEntry path="xBei.Helper.DragHelper"/>
+    <classEntry path="xBei.UI.CheckBox"/>
+    <classEntry path="xBei.UI.RadioButton"/>
+    <classEntry path="xBei.UI.CheckButton"/>
+    <classEntry path="xBei.UI.ScrollPanel"/>
   </includeClasses>
   <includeResources/>
   <namespaceManifests/>

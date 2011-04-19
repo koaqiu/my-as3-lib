@@ -86,6 +86,7 @@ package com.CGFinal {
 				}
 				(_initDatas[key] as Array).push(value);
 			}
+import flash.display.Stage;
 
 			return _inspector;
 		}
@@ -122,6 +123,12 @@ package com.CGFinal {
 			focusSkin.visible = false;
 			
 			this.addChild(focusSkin);
+		}
+		public function Focus():void{
+			if(this.stage != null){
+				this.stage.focus = this;
+			}
+			
 		}
 		public function SetSize(pWidth:Number, pHeight:Number):void {
 			var vc:Boolean = false;

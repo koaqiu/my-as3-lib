@@ -6,6 +6,9 @@
 	
 	import gs.TweenLite;
 	
+	import xBei.Manager.HotKeyManager;
+	import xBei.Manager.MessageManager;
+	
 	/**
 	 * 模式窗口管理
 	 * @author KoaQiu
@@ -15,15 +18,27 @@
 		private static var _winList:Vector.<LBWin>;
 		
 		private static var _showing:Boolean = false;
+		/**
+		 * 是否正在打开窗口
+		 * @return 
+		 */
 		public static function get Showing():Boolean {
 			return LightBoxManager._showing;
 		}
+		/**
+		 * 是否拥有打开的窗口
+		 * @return 
+		 */
 		public static function get HasWinow():Boolean {
-			return glo.IsNullOrUndefined(LightBoxManager._curWin) == false;
+			return _winList != null && _winList.length > 0;
 		}
 		
 		private static var _initArgs:Object;
 		private static var _stage:Stage;
+		/**
+		 * 返回初始参数
+		 * @return 
+		 */
 		public static function InitArgs():Object{
 			var c:Object = {};
 			for (var k:Object in _initArgs) {
@@ -31,6 +46,11 @@
 			}
 			return c;
 		}
+		/**
+		 * 初始化管理器
+		 * @param stage
+		 * @param args
+		 */		
 		public static function Init(stage:Stage,args:Object):void{
 			_stage = stage;
 			//初始化.参数
@@ -67,13 +87,13 @@
 		internal static function ShowWin(win:LBWin):void {
 			var index:int = LightBoxManager._winList.indexOf(win);
 			if(index >= 0){
+				trace('已经存在列表中....');
 				LightBoxManager._winList.splice(index, 1);
 			}
 			LightBoxManager._winList.push(win);
 			LightBoxManager._curWin = win;
-			try{
-				HotKeyManager.Instance.Enabled = false;
-			}catch(error:Error){}
+			
+			MessageManager.SendMessage(0xE0000000);
 			
 			//初始化.参数
 			var stage:Stage = win.stage;
@@ -106,6 +126,8 @@
 				}else{
 					location |= 0x30;
 				}
+				
+				trace('StageAlign = 0x', location.toString(16));
 			}
 
 			win.visible = false;
@@ -126,95 +148,104 @@
 			win.x = (sw - win.width) / 2;
 			win.y = (sh - win.height) / 2;
 			//修正位置
-			//if (stage.align == "") {
-				//居中
-				var dx:Number = 0;
-				var dy:Number = 0;
+			var dx:Number = 0;
+			var dy:Number = 0;
+			
+			if((location & 0x03) == 0x03){
+				dx = (sw - win._args.sWidth);
+			}else if((location & 0x07) == 0x07){
 				
-				if((location & 0x03) == 0x03){
-					dx = (sw - win._args.sWidth);
-				}else if((location & 0x07) == 0x07){
-					
-				}
-				if((location & 0x30) == 0x30){
-					dy = (sh - win._args.sHeight);
-				}else if((location & 0x70) == 0x70){
-					
-				}
-				//win.x -= dx / 2;
-				//win.y -= dy / 2;
-				win._mask.x -= dx / 2;
-				win._mask.y -= dy / 2;
+			}else{
+				trace('左边');
+				dx = (sw - win._args.sWidth);
+			}
+			
+			if((location & 0x30) == 0x30){
+				dy = (sh - win._args.sHeight);
+			}else if((location & 0x70) == 0x70){
 				
-				win.x = win._mask.x + (sw - win.width) / 2;
-				win.y = win._mask.y + (sh - win.height) / 2;
-			//}
+			}else{
+				trace('顶部');
+				dy = (sh - win._args.sHeight);
+			}
+			win._mask.x -= dx / 2;
+			win._mask.y -= dy / 2;
+
 			if(win._args.CloseButton){
 				win.btnClose.addEventListener(MouseEvent.CLICK, mask_click);
 			}
+			
+			trace('OffsetY',win._args.OffsetY);
+			var _onUpdate2:Function = function(pWin:LBWin, stageWidth:Number,stageHeight:Number):void {
+				//trace(pWin.x, pWin._mask.x, stageWidth);
+				pWin.x = pWin._mask.x + (stageWidth - pWin.width) / 2;
+				pWin.y = pWin._mask.y + (
+										pWin._args.OffsetY == 0 ? (stageHeight - pWin.height) / 2
+																: pWin._args.OffsetY
+										);
+				//trace('size win:',stageWidth,stageHeight,pWin._mask.y ,pWin.y, pWin.height, (stageHeight - pWin.height) / 2);
+			};
+			var _onComplete3:Function = function(pWin:LBWin):void {
+				if(pWin._args.CloseButton){
+					//trace("窗体显示完成，移动关闭按钮");
+					pWin.btnClose.x = (pWin.width - pWin.btnClose.width) / 2;
+					TweenLite.to(pWin.btnClose, .3, { 
+						x:glo.IsMac ? pWin._args.closeButtonOffX
+									: pWin.width - pWin._args.closeButtonOffX,
+						autoAlpha:1
+					} );
+				}
+				//事件
+				pWin.onShow();
+				win.IsAni = false;
+				LightBoxManager._showing = false;
+			}
+			var _onComplete2:Function = function(pWin:LBWin):void {
+				//trace("第三步 颜色恢复正常");
+				//pWin.onBeforeShow();
+				TweenLite.to(pWin, .5, { 
+					removeTint:true,
+					onCompleteParams:[pWin],
+					onComplete:_onComplete3
+				});
+			};
+			var _onComplete1:Function =	function(pWin:LBWin,stageWidth:Number,stageHeight:Number):void {
+				//trace("第二步 显示窗体（在中间从小到大，亮白）");
+				TweenLite.to(pWin, .4, { 
+					autoAlpha:1,
+					scaleX:1,
+					scaleY:1,
+					onUpdateParams:[pWin,stageWidth, stageHeight],
+					onUpdate:_onUpdate2,
+					onCompleteParams:[pWin],
+					onComplete:_onComplete2,
+					ease:pWin._args.ease
+				} );
+			};
 			//第一步 显示遮罩
 			//trace("第一步 显示遮罩");
 			LightBoxManager._showing = true;
+			win.IsAni = true;
 			TweenLite.to(win._mask, .2, {
 				autoAlpha:win._args.maskAlpha,
-				onCompleteParams:[win,sw],
-				onComplete:function(pWin:LBWin,stageWidth:Number):void {
-					//第二步 显示窗体（在中间从小到大，亮白）
-					//trace("第二步 显示窗体（在中间从小到大，亮白）");
-					TweenLite.to(pWin, .4, { 
-						autoAlpha:1,
-						scaleX:1,
-						scaleY:1,
-						onUpdateParams:[pWin,stageWidth],
-						onUpdate:function(ppWin:LBWin,pStageWidth:Number):void {
-							ppWin.x = ppWin._mask.x + (pStageWidth - ppWin.width) / 2;
-							ppWin.y = ppWin._mask.y + (ppWin._args.OffsetY == 0?(sh - ppWin.height) / 2:ppWin._args.OffsetY);
-						},
-						onCompleteParams:[pWin],
-						onComplete:function(ppWin:LBWin):void {
-							//第三步 颜色恢复正常
-							//trace("第三步 颜色恢复正常");
-							ppWin.onBeforeShow();
-							TweenLite.to(ppWin, .5, { 
-								removeTint:true,
-								onCompleteParams:[ppWin],
-								onComplete:function(pppWin:LBWin):void {
-									if(pppWin._args.CloseButton){
-										//窗体显示完成，移动关闭按钮
-										//trace("窗体显示完成，移动关闭按钮");
-										pppWin.btnClose.x = (pppWin.width - pppWin.btnClose.width) / 2;
-										TweenLite.to(pppWin.btnClose, .3, { 
-											x:glo.IsMac?pppWin._args.closeButtonOffX:pppWin.width - pppWin._args.closeButtonOffX,
-											autoAlpha:1
-										} );
-									}
-									//事件
-									pppWin.onShow();
-									LightBoxManager._showing = false;
-								}
-							} );
-						},
-						ease:pWin._args.ease
-					} );
-				}
+				onCompleteParams:[win, sw, sh],
+				onComplete: _onComplete1
 			});
 		}
 		/**
 		 * 隐藏窗口
 		 */
-		public static function Hide():void {
-			if(LightBoxManager._winList.length > 0){
-				_curWin = LightBoxManager._winList[LightBoxManager._winList.length - 1];
-			}else{
-				return;
+		public static function Hide(tmpWin:LBWin = null):void {
+			if(tmpWin == null){
+				if(LightBoxManager._winList.length > 0){
+					tmpWin = LightBoxManager._winList[LightBoxManager._winList.length - 1];
+				}else{
+					return;
+				}
 			}
-			trace('lightbox hide', _curWin.canClose)
-			if (!_curWin.canClose) {
-				return;
-			}
-			//trace("LightBoxManager.Hide", LightBoxManager._showing)
-			if (LightBoxManager._showing) {
-				//还在显示
+			//*
+			if (tmpWin.IsAni) {
+				trace('窗口还在显示，等待一会儿再关闭...')
 				var timer:Timer = new Timer(1500);
 				timer.addEventListener(TimerEvent.TIMER, function(e:TimerEvent):void { 
 					var tt:Timer = e.target as Timer;
@@ -222,31 +253,34 @@
 					tt.stop();
 					tt.removeEventListener(TimerEvent.TIMER, arguments.callee);
 					tt = null;
-					LightBoxManager.Hide();
+					LightBoxManager.Hide(tmpWin);
 				} );
 				timer.start();
 				return;
 			}
-			try{
-				HotKeyManager.Instance.Enabled = true;
-			}catch(error:Error){}
+			//*/
+			
+			trace('LightBoxManager.Hide canClose=', tmpWin.canClose, 'isshow=', tmpWin.IsShow)
+			if (tmpWin.canClose == false || tmpWin.IsShow == false) {
+				return;
+			}
+			
 			//trace("开始关闭 LightBox");
-			var win:LBWin = _curWin;
-			if(win._args.CloseButton){
+			if(tmpWin._args.CloseButton){
 				//第一步 隐藏按钮
-				TweenLite.to(win.btnClose, .3, {
-					x:(win.width - win.btnClose.width) / 2,
+				TweenLite.to(tmpWin.btnClose, .3, {
+					x:(tmpWin.width - tmpWin.btnClose.width) / 2,
 					autoAlpha:0,
-					onCompleteParams:[win],
+					onCompleteParams:[tmpWin],
 					onComplete:function(pWin:LBWin):void {
 						_hide(pWin);
 					}
 				});
 			}else {
 				//直接关闭
-				_hide(win);
+				_hide(tmpWin);
 			}
-			_curWin = null;
+			tmpWin = null;
 		}
 		private static function _hide(win:LBWin):void {
 			//第二步 窗口闪白且同时消失
@@ -278,6 +312,11 @@
 								ppWin.dispose();
 							}
 							LightBoxManager._winList.pop();
+							if(LightBoxManager._winList.length == 0){
+								MessageManager.SendMessage(0xE0000001);
+							}else{
+								MessageManager.SendMessage(0xE0000000);	
+							}
 						}
 					} );
 					//窗口恢复原始状态
@@ -286,9 +325,12 @@
 			});
 		}
 		private static function mask_click(e:MouseEvent):void {
+			trace('LightBoxManager.Mask clicked');
+			if(_curWin != null){
+				trace('_curWin.IsShow=',_curWin.IsShow)
+			}
+			if(_curWin == null || _curWin.IsShow)
 			LightBoxManager.Hide();
 		}
-		
 	}
-	
 }

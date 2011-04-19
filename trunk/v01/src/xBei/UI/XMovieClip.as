@@ -54,6 +54,10 @@ package xBei.UI {
 		
 		public function XMovieClip() {
 			super();
+			this.createChildren();
+		}
+		protected function createChildren():void{
+			
 		}
 		/**
 		 * 清理对象

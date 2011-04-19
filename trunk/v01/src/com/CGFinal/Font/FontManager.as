@@ -4,13 +4,14 @@
 	import flash.net.URLRequest;
 	import flash.text.Font;
 	
+	
+	[Event(name = "complete", type = "flash.events.Event")]
+	[Event(name = "ioError", type = "flash.events.IOErrorEvent")]
+	[Event(name = "progress", type = "flash.events.ProgressEvent")]
 	/**
 	 * 字体管理器
 	 * @author KoaQiu
 	 */
-	[Event(name = "complete", type = "flash.events.Event")]
-	[Event(name = "ioError", type = "flash.events.IOErrorEvent")]
-	[Event(name = "progress", type = "flash.events.ProgressEvent")]
 	 public class FontManager extends EventDispatcher{
 		private static var _instance:FontManager;
 		private var _fontList:Array;
