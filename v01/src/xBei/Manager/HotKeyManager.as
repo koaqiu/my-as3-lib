@@ -28,10 +28,9 @@ package xBei.Manager
 		/**
 		 * 得到唯一实例 
 		 * @return 
-		 * 
 		 */
 		public static function get Instance():HotKeyManager {
-			if (HotKeyManager._ins) {
+			if (HotKeyManager._ins != null) {
 				return HotKeyManager._ins;
 			}else {
 				throw new Error("未初始化");
@@ -43,15 +42,17 @@ package xBei.Manager
 		 * @return 
 		 * 
 		 */
-		public function Init(stage:Stage):HotKeyManager{
-			HotKeyManager._ins = new HotKeyManager(stage);
+		public static function Init(stage:Stage):HotKeyManager{
+			if(HotKeyManager._ins == null){
+				HotKeyManager._ins = new HotKeyManager(stage);
+			}
 			return HotKeyManager._ins;
 		}
 		private var _stage:Stage;
 		private var _eventObject:Object;
-		private var disableList:Object;
-		private var _keys:Array;
-		private var _keyMpas:Object;
+		private var _disableList:Object;
+		private var _keys:Array = [];
+		private var _keyMpas:Object = {};
 
 		private var _enabled:Boolean = false;
 		/**
@@ -64,16 +65,14 @@ package xBei.Manager
 		}
 
 		public function set Enabled(v:Boolean):void	{
-			if (v) {
-				if (_enabled == false && _stage!=null) {
-					_stage.addEventListener(KeyboardEvent.KEY_UP, stageKeyUp);
+			if(this._enabled != v && this._stage != null){
+				if (v) {
+					this._stage.addEventListener(KeyboardEvent.KEY_UP, DPE_StageKeyUp);
+				}else {
+					this._stage.removeEventListener(KeyboardEvent.KEY_UP, DPE_StageKeyUp);
 				}
-			}else {
-				if(_enabled && _stage!=null){
-					_stage.removeEventListener(KeyboardEvent.KEY_UP, stageKeyUp);
-				}
+				this._enabled = v;
 			}
-			_enabled = v;
 		}
 
 		/**
@@ -89,11 +88,18 @@ package xBei.Manager
 				throw new Error("只能有一个实例！");
 				return;
 			}
-			_stage = stage;
+			this._disableList = {};
+			this._eventObject = {};
+			this._keyMpas = [];
+			this._keys =[];
+			this._stage = stage;
+			
 			MessageManager.AddListener([
 				DISABLED_KEYS,
 				ENABLED_KEYS
 			],this);
+			
+			this.Enabled = true;
 		}
 		/**
 		* 设置程序的快捷键是否可用
@@ -102,9 +108,9 @@ package xBei.Manager
 		*/ 
 		public function Disable(app:String, isEnabled:Boolean):void {
 			if (isEnabled) {
-				delete disableList[app];
+				delete _disableList[app];
 			}else {
-				disableList[app] = true;
+				_disableList[app] = true;
 			}
 		}
 		/**
@@ -189,8 +195,10 @@ package xBei.Manager
 		public function WndProc(MESSAGE:uint, source:Object = null, args:*=null):uint {
 			switch(MESSAGE) {
 				case HotKeyManager.DISABLED_KEYS:
+					this.Enabled = false;
 					break;
 				case HotKeyManager.ENABLED_KEYS:
+					this.Enabled = true;
 					break;
 			}
 			return MessageManager.SUCCEED;
@@ -207,12 +215,12 @@ package xBei.Manager
 				ek += 0x4;
 			}
 			
-			for (var k:Object in _keys) {
-				var item:Object = _keys[k];
+			for (var k:Object in this._keys) {
+				var item:Object = this._keys[k];
 				if (item.key == key && item.extKey == ek) {
 					var sn:Array = item.sn.split("|");
 					var app:String = sn[0];
-					if (disableList[app]) {
+					if (this._disableList[app]) {
 						return false;
 					}
 					var command:String = sn[1];
@@ -224,14 +232,15 @@ package xBei.Manager
 		}
 		//Do Events
 		protected function OnKeyPress(app:String,cmd:String,eobj:Object):void{
+			trace('HOTKEY ' ,app, cmd, eobj);
 			MessageManager.SendMessage(HotKeyManager.KEY_PRESS,this,null,app,cmd,eobj);
 			
 		}
 		//Events
-		private function stageKeyUp(e:KeyboardEvent):void {
-			//trace(e.target, e.keyCode);
-			_eventObject = e.target;
-			_checkKey(e.keyCode, e.altKey, e.ctrlKey, e.shiftKey);
+		private function DPE_StageKeyUp(e:KeyboardEvent):void {
+			trace('HotKeyManager ',e.target, e.keyCode);
+			this._eventObject = e.target;
+			this._checkKey(e.keyCode, e.altKey, e.ctrlKey, e.shiftKey);
 		}
 	}
 }

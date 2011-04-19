@@ -5,6 +5,7 @@
 	
 	import xBei.Helper.StringHelper;
 	import xBei.Interface.IDispose;
+	import xBei.UI.XMovieClip;
 	
 	/**
 	 * 一个弹出窗口
@@ -20,7 +21,7 @@
 	 * noDispose:false
 	 * @author KoaQiu
 	 */
-	public class LBWin extends MovieClip implements IDispose {
+	public class LBWin extends XMovieClip {
 		public var btnClose:SimpleButton;
 		private var _isShow:Boolean = false;
 
@@ -32,6 +33,7 @@
 		public function get IsShow():Boolean{
 			return _isShow;
 		}
+		public var IsAni:Boolean = false;
 
 		public var _args:Object;
 		internal var _mask:Sprite;
@@ -57,7 +59,7 @@
 		}
 		protected function CreateChildren():void {
 		}
-		public function dispose():void{
+		override public function dispose():void{
 			while(super.numChildren > 0){
 				var disp:DisplayObject = super.removeChildAt(0); 
 				if(disp is IDispose){
@@ -87,6 +89,7 @@
 			}
 			
 			this.CreateChildren();
+			this.onBeforeShow();
 			stage.addChild(this);
 			if (this._args.CloseButton) {
 				if (StringHelper.IsNullOrEmpty(this._args.ClouseButtonName)) {
@@ -102,8 +105,12 @@
 			}
 			LightBoxManager.ShowWin(this);
 		}
+		/**
+		 * 隐藏当前窗口
+		 * @see com.CGFinal.Utilities.LightBoxManager#Hide()
+		 */
 		public function Hide():void {
-			LightBoxManager.Hide();
+			LightBoxManager.Hide(this);
 		}
 		
 		protected function doShow():void { }
@@ -114,6 +121,7 @@
 		}
 		internal function onShow():void {
 			this._isShow = true;
+			trace(this,'onshow');
 			this.doShow();
 			this.dispatchEvent(new Event("onShow"));
 			if(this.stage != null){

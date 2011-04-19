@@ -37,6 +37,22 @@ package xBei.UI {
 		public static var inCallLaterPhase:Boolean=false;
 		
 		/**
+		 * 自动Alpha值（0~1），值大于0时自动设置visible = true，否则设置visible = false
+		 * @return 
+		 */
+		public function get AutoAlpha():Number{
+			if(this.alpha == 0 && this.visible){
+				this.visible = false;
+			}else if(this.alpha > 0 && this.visible == false){
+				this.visible = true;
+			}
+			return this.alpha;
+		}
+		public function set AutoAlpha(v:Number):void{
+			this.visible = v > 0;
+			this.alpha = v;
+		}
+		/**
 		 * 返回该对象在显示层级中的引索，如果不在显示队列则返回 -1。0 表示对象在最底层
 		 * @return 
 		 * @see #VDepth()

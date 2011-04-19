@@ -109,6 +109,7 @@ package xBei.Manager
 		private var _target:DisplayObject;
 		private var _cb_OnHide:Function;
 		private var _isTop:Boolean = false;
+		
 		function PopUpManager(disp:DisplayObject, location:Point = null, target:DisplayObject = null, onHide:Function = null){
 			//保存原始信息
 			_oldParent = {
@@ -125,11 +126,7 @@ package xBei.Manager
 			_target = target;
 			_cb_OnHide = onHide;
 			trace('PopUpManager.Show',this._disp is IPopupObject);
-			var po:IPopupObject = _disp as IPopupObject;
-			if(po != null){
-				po.IsPopuped = true;
-				po.OnShow();
-			}
+			
 			var useLoc:Point;
 			if(location == null){
 				//未指定显示位置
@@ -145,6 +142,11 @@ package xBei.Manager
 			_disp.x = useLoc.x;
 			_disp.y = useLoc.y;
 			_stage.addChild(_disp);
+			var po:IPopupObject = _disp as IPopupObject;
+			if(po != null){
+				po.IsPopuped = true;
+				po.OnShow();
+			}
 			_isTop = true;
 		}
 		private function _hide(isRemove:Boolean = false):void{

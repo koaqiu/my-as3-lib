@@ -1,18 +1,11 @@
 ﻿package com.CGFinal.Font {
-	import flash.display.Loader;
-	import flash.events.ErrorEvent;
-	import flash.events.Event;
-	import flash.events.EventDispatcher;
-	import flash.events.IOErrorEvent;
-	import flash.events.ProgressEvent;
+	import flash.display.*;
+	import flash.events.*;
 	import flash.net.URLRequest;
-	import flash.system.ApplicationDomain;
-	import flash.system.LoaderContext;
-	import flash.system.Security;
-	import flash.text.Font;
-	import flash.text.FontStyle;
-	import flash.text.TextField;
+	import flash.system.*;
+	import flash.text.*;
 	
+	import xBei.Fonts.FontStyles;
 	import xBei.Interface.IFont;
 	
 	/**
