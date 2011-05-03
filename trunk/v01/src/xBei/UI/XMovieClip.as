@@ -63,6 +63,7 @@ package xBei.UI {
 		 * 清理对象
 		 */
 		public function dispose():void {
+			stop();
 			while(this.numChildren > 0){
 				var item:DisplayObject = this.removeChildAt(0);
 				glo.DisposeDisplayObject(item);

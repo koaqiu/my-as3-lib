@@ -52,5 +52,14 @@ package xBei.Web.Data {
 				return dv;
 			}
 		}
+		/**
+		 * 从“FlashVars”中读取布尔值
+		 * @param key
+		 * @param dv
+		 * @return 
+		 */
+		protected function getAppParamBoolean(key:String, dv:Boolean):Boolean{
+			return glo.ToBoolean(_parameters[key], dv);
+		}
 	}
 }

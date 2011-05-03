@@ -39,6 +39,9 @@
     <classEntry path="xBei.UI.RadioButton"/>
     <classEntry path="xBei.UI.CheckButton"/>
     <classEntry path="xBei.UI.ScrollPanel"/>
+    <classEntry path="xBei.Net.XLoader"/>
+    <classEntry path="xBei.Interface.IClone"/>
+    <classEntry path="xBei.Manager.CloneManager"/>
   </includeClasses>
   <includeResources/>
   <namespaceManifests/>

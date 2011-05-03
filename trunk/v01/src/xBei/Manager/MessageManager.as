@@ -144,8 +144,7 @@
 			for each(var item:Array in _listeners) {
 				var index:int = item.indexOf(listener);
 				if (index >= 0) {
-					trace("remove ", listener, index);
-					item.splice(index, index);
+					item.splice(index, 1);
 				}
 			}
 		}
@@ -176,6 +175,7 @@
 			}
 			if(tmp.indexOf(listener)==-1){
 				tmp.push(listener);
+				//trace(MESSAGE.toString(16), '-----------------------------------',tmp[tmp.length-1]);
 				return SUCCEED;
 			}else {
 				//已经存在

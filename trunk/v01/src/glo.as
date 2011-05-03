@@ -96,10 +96,11 @@
 		 * @param item
 		 */
 		public static function DisposeDisplayObject(item:*):void{
-			if(item is Loader){
+			if(item == null){
+				return;
+			}else if(item is Loader){
 				(item as Loader).unloadAndStop();
-			}
-			if(item is IDispose){
+			}else if(item is IDispose){
 				(item as IDispose).dispose();
 			}else if(item.hasOwnProperty('dispose')){
 				try{
@@ -128,6 +129,15 @@
 			if(IsNullOrUndefined(s)){
 				return dv;
 			}else{
+				var v:String = String(s).toLowerCase();
+				var reg:RegExp = new RegExp('^\\d+$','ig');
+				if(reg.exec(v)){
+					return int(v) > 0;
+				}else if(v == 'true'){
+					return true;
+				}else if(v == 'false'){
+					return false;
+				}
 				try{
 					return Boolean(s);
 				}catch(err:Error){
@@ -160,6 +170,12 @@
 		 */
 		public static function CreateObject(className:String):Object {
 			return new (getDefinitionByName(className) as Class)();
+		}
+		public static function Clone(obj:Object):* {
+			var copier:ByteArray = new ByteArray();
+			copier.writeObject(obj);
+			copier.position = 0;
+			return copier.readObject();
 		}
 	}
 }

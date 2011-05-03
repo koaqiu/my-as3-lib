@@ -161,6 +161,7 @@
 			}
 			
 			if((location & 0x30) == 0x30){
+				trace(sh,win._args.sHeight);
 				dy = (sh - win._args.sHeight);
 			}else if((location & 0x70) == 0x70){
 				
@@ -168,6 +169,7 @@
 				trace('顶部');
 				dy = (sh - win._args.sHeight);
 			}
+			trace('--',dx,'--',dy)
 			win._mask.x -= dx / 2;
 			win._mask.y -= dy / 2;
 
