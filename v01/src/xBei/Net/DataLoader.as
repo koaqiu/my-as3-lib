@@ -1,4 +1,6 @@
 package xBei.Net{
+	import com.adobe.serialization.json.JSON;
+	
 	import flash.events.*;
 	import flash.net.*;
 	import flash.system.Capabilities;
@@ -10,7 +12,7 @@ package xBei.Net{
 	/**
 	 * 连接超时 
 	 */
-	[Event(name = "timeOut", type = "xBei.NetEvents.DataLoaderEvent")]
+	[Event(name = "timeOut", type = "xBei.Net.Events.DataLoaderEvent")]
 	/**
 	 * 数据加载完毕 
 	 */
@@ -59,6 +61,9 @@ package xBei.Net{
 		private var _timer:Timer;
 		private var _callBack:Function;
 		private var _lastRq:URLRequest;
+		public function get RequestUrl():URLRequest{
+			return this._lastRq;
+		}
 		private var _file:FileReference;
 		/**
 		 * 工作模式
@@ -310,7 +315,7 @@ package xBei.Net{
 			}
 		}
 		private function DPE_BeginTransfer(e:Event):void {
-			trace("DPE_BeginTransfer",this._lastRq.url);
+			trace("DPE_BeginTransfer",this._lastRq.url, JSON.encode(this._lastRq.data));
 			this._timer.removeEventListener(TimerEvent.TIMER, DPE_TimeOut);
 			this._timer.stop();
 		}

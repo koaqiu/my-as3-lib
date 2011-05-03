@@ -20,6 +20,20 @@ package xBei.Helper {
 				return Math.floor(x);
 			}
 		}
+		/**
+		 * 四舍五入，保留小数
+		 * @param x
+		 * @param length	保留的小数位数
+		 * @return 
+		 */
+		public static function round(x:Number, length:int = 0):Number{
+			if(length > 0){
+				var beishu:Number = Math.pow(10, length);
+				return Math.round(x * beishu) / beishu;
+			}else{
+				return Math.round(x);
+			}
+		}
 	}
 }
 class pc{}
