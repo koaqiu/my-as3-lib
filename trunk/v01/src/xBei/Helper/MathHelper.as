@@ -20,6 +20,9 @@ package xBei.Helper {
 				return Math.floor(x);
 			}
 		}
+		public static function Random(max:Number, min:Number):Number{
+			return Math.random() * (max - min) + min;
+		}
 		/**
 		 * 四舍五入，保留小数
 		 * @param x

@@ -145,8 +145,9 @@ package xBei.Net{
 			if(this._checkUrl(pUrl)){
 				_mode = 0;
 				this._initTimer(timeOut);
-				this._callBack = callBack;
-
+				if(callBack != null){
+					this._callBack = callBack;
+				}
 				this._timer.addEventListener(TimerEvent.TIMER, DPE_TimeOut);
 				this._timer.start();
 				super.load(_lastRq);
@@ -159,6 +160,7 @@ package xBei.Net{
 		 * 
 		 */		
 		public function Post(url:String, dataFormat:String, callBack:Function = null):void{
+			trace('DataLoader Post:',url,callBack);
 			this._callBack = callBack;
 			var rq:URLRequest = new URLRequest(url);
 			rq.method = URLRequestMethod.POST;
@@ -231,13 +233,11 @@ package xBei.Net{
 		 */
 		protected function prepareRequest():URLVariables {
 			var uv:URLVariables = new URLVariables();
-			
 			if (this.RequestData != null) {
 				for (var k:* in this.RequestData) {
-					uv.param[k] = this.RequestData[k];
+					uv[k] = this.RequestData[k];
 				}
 			}
-			
 			return uv;
 		}
 		/**
@@ -272,6 +272,8 @@ package xBei.Net{
 			this.dispatchEvent(new DataLoaderEvent(DataLoaderEvent.DATA_LOADED));
 			if (this._callBack != null) {
 				return this._callBack(this);
+			}else{
+				trace('DataLoader.OnDataLoaded callback is ', this._callBack);
 			}
 			return true;
 		}
@@ -349,7 +351,7 @@ package xBei.Net{
 			this.OnTimeOut();
 		}
 		private function DPE_HttpStatusChanged(e:HTTPStatusEvent):void {
-			trace("HTTPStatus:",e.status);
+			trace("HTTPStatus:",e.status, this.RequestUrl.url);
 			if (Capabilities.playerType == "DirectorXtra") {
 				var t:Timer = new Timer(100);
 				t.addEventListener(TimerEvent.TIMER, DPE_DIR_Loaded);

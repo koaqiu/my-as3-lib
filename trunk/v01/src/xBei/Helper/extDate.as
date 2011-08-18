@@ -8,7 +8,7 @@ package xBei.Helper {
 	public class extDate{
 		private var _date:Date;
 		public function extDate(year:* = null, month:* = null, date:* = null, hours:* = null, minutes:* = null, seconds:* = null, ms:* = null){
-			_date=new Date(year, month, date, hours, minutes, seconds, ms);
+			_date = new Date(year, month, date, hours, minutes, seconds, ms);
 		}
 		/// The day of the month (an integer from 1 to 31) specified by a Date object according to local time.
 		public function get date () : Number{
@@ -358,10 +358,9 @@ package xBei.Helper {
 		 * 从Date中创建 
 		 * @param v		Date	输入值
 		 * @return 
-		 * 
 		 */
 		public static function CreateFromDate(v:Date):extDate{
-			var d:extDate=new extDate();
+			var d:extDate = new extDate();
 			d.setTime(v.time);
 			return d;
 		}
@@ -436,9 +435,9 @@ package xBei.Helper {
 					replace(/m/g, this.getMinutes()).
 					replace(/ss/ig, this._f2(this.getSeconds())).
 					replace(/s/ig, this.getSeconds()).
-					replace(/nnn/ig, this._f2(this.getMilliseconds(),3)).
-					replace(/nn/ig, this._f2(this.getMilliseconds())).
-					replace(/n/ig, this.getMilliseconds());
+					replace(/n{3}/ig, this._f2(this.getMilliseconds(),3)).
+					replace(/n{2}/ig, this._f2(this.getMilliseconds())).
+					replace(/n{1}/ig, this._f2(this.getMilliseconds(), 1));
 			}
 		}
 		private function _getShortHour(F:Boolean):String {
@@ -453,9 +452,19 @@ package xBei.Helper {
 			return s + F?this._f2(h):String(h);
 		}
 		private function _f2(v:int, l:int = 2):String {
-			if (l <= 1) { return String(v);}
-			var len:int = Math.pow(10, l - 1);
-			return v >= len?String(v):"0" + this._f2(v, l - 1);
+			var s:String = v.toString();
+			if (s.length == l) { 
+				return s;
+			}else if(s.length < l){
+				var len:int = l - s.length;
+				for(var i:int = 0; i < len; i++){
+					s = '0' + s;
+				}
+				//trace(v,l,s);
+				return s;	
+			}else{
+				return s.substr(0, l);
+			}
 		}
 		public function toString():String {
 			return _date.toString();

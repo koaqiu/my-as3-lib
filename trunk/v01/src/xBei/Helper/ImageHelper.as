@@ -1,10 +1,13 @@
 package xBei.Helper{
 	import com.adobe.images.JPGEncoder;
+	import com.adobe.images.PNGEncoder;
 	
 	import flash.display.*;
 	import flash.events.*;
 	import flash.geom.*;
 	import flash.utils.ByteArray;
+	
+	//import mx.graphics.codec.PNGEncoder;
 
 	/**
 	 * 一组图形处理的静态方法 
@@ -22,6 +25,15 @@ package xBei.Helper{
 		public static function GetByteData(bit:BitmapData,q:int=90):ByteArray {
 			var _encoder:JPGEncoder = new JPGEncoder(q);
 			return _encoder.encode(bit);
+		}
+		/**
+		 * 得到PNG格式的图片数据
+		 * @param bit
+		 * @return 
+		 */
+		public static function GetPNGImageData(bit:BitmapData):ByteArray {
+			//var _encoder:PNGEncoder = new PNGEncoder();
+			return PNGEncoder.encode(bit);
 		}
 		public static function BtyesToBitmap(data:ByteArray,callBack:Function):void{
 			var bitmapData:BitmapData;
@@ -190,6 +202,38 @@ package xBei.Helper{
 			bd.draw(source, m,null,null,null,true);
 			source.scaleX = source.scaleY = s;
 			return bd;
+		}
+		/**
+		 * 垂直翻转图片
+		 * @param bt
+		 * @return 
+		 */
+		public static function FlipVertical(bt:BitmapData):BitmapData {
+			var bmd:BitmapData = new BitmapData(bt.width, bt.height, true, 0x00000000);
+			bt.lock();
+			for (var xx:int = 0; xx<bt.width; xx++) {
+				for (var yy:int = 0; yy<bt.height; yy++) {
+					bmd.setPixel32(xx, bt.height-yy-1, bt.getPixel32(xx,yy));
+				}
+			}
+			bt.unlock();
+			bt.dispose();
+			return bmd;
+		}
+		/**
+		 * 水平翻转图片
+		 * @param bt
+		 * @return 
+		 */
+		public static function FlipHorizontal(bt:BitmapData):BitmapData {
+			var bmd:BitmapData = new BitmapData(bt.width, bt.height, true, 0x00000000);
+			for (var yy:int = 0; yy<bt.height; yy++) {
+				for (var xx:int = 0; xx<bt.width; xx++) {
+					bmd.setPixel32(bt.width-xx-1, yy, bt.getPixel32(xx,yy));
+				}
+			}
+			bt.dispose();
+			return bmd;
 		}
 	}
 }

@@ -107,6 +107,8 @@ package xBei.Net{
 				_valid = this._parseUrl(url);
 				if(_valid){
 					this._parseQuery();
+				}else{
+					this._uv = new RequestQueryString();
 				}
 			}
 		}
@@ -188,15 +190,14 @@ package xBei.Net{
 		}
 		private function _parseQuery():void{
 			if(_query.length == 0){
-				return;
+				_uv = new RequestQueryString();
+			}else{
+				try{
+					_uv = new RequestQueryString(_query);
+				}catch(err:Error){
+					_uv = new RequestQueryString(err.message);
+				}
 			}
-			
-			var uv:RequestQueryString = new RequestQueryString();
-			try{
-				uv.decode(_query);
-			}catch(err:Error){
-			}
-			_uv = uv;
 		}
 		private function _validateURI():Boolean{
 			if(['','http','https','ftp','file','mailto'].indexOf(_scheme) == -1){
@@ -293,7 +294,7 @@ package xBei.Net{
 			}
 			
 			var sQuery:String = '';
-			if(_uv != null){
+			if(_uv != null && this._uv.HasKey){
 				sQuery = '?' + _uv.toString();
 			}
 			var sFragment:String = '';

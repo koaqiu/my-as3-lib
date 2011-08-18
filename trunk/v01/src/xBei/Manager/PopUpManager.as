@@ -139,6 +139,18 @@ package xBei.Manager
 			}else{
 				useLoc = location;
 			}
+			
+			//边界检查，调整位置
+			if(useLoc.x + this._disp.width >= _stage.stageWidth){
+				useLoc.x = _stage.stageWidth - this._disp.width -2;
+			}else if(useLoc.x < 0){
+				useLoc.x = 0;
+			}
+			if(useLoc.y + this._disp.height >= _stage.stageHeight){
+				useLoc.y = _stage.stageHeight - this._disp.height -2;
+			}else if(useLoc.x < 0){
+				useLoc.y = 0;
+			}
 			_disp.x = useLoc.x;
 			_disp.y = useLoc.y;
 			_stage.addChild(_disp);

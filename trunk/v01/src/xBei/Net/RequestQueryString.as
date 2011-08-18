@@ -6,8 +6,13 @@ package xBei.Net{
 	 * @author KoaQiu
 	 * @see xBei.Net.Uri
 	 */
-	public class RequestQueryString extends URLVariables{
-		public function RequestQueryString(source:String=null){
+	public dynamic class RequestQueryString extends URLVariables{
+		private var _hasKey:Boolean = false;
+		public function get HasKey():Boolean{
+			return this._hasKey;
+		}
+		public function RequestQueryString(source:String = null){
+			this._hasKey = source != null;
 			super(source);
 		}
 		/**
@@ -23,7 +28,8 @@ package xBei.Net{
 			}else if(value == null){
 				this.Remove(key);
 			}else{
-				super[key] = value;
+				this[key] = value;
+				this._hasKey = true;
 			}
 		}
 		/**
@@ -41,10 +47,10 @@ package xBei.Net{
 		 * @return	发生错误时返回 dv 的值
 		 */
 		public function Get(key:String, dv:String = ""):String {
-			if (super[key] == null) {
+			if (this.hasOwnProperty(key) == false || this[key] == null) {
 				return dv;
 			}else {
-				return super[key];
+				return this[key];
 			}
 		}
 		/**
@@ -54,11 +60,11 @@ package xBei.Net{
 		 * @return
 		 */
 		public function GetInt(key:String, dv:int=0):int {
-			if (super[key] == null) {
+			if (this.hasOwnProperty(key) == false || this[key] == null) {
 				return dv;
 			}
 			try{
-				return int(super[key]);
+				return int(this[key]);
 			}catch (err:Error) {
 			}
 			return dv;
@@ -70,7 +76,7 @@ package xBei.Net{
 		 * @return
 		 */
 		public function GetNumber(key:String, dv:Number=0.0):Number {
-			if (super[key] == null) {
+			if (super.hasOwnProperty(key) == false || super[key] == null) {
 				return dv;
 			}
 			try{
@@ -86,7 +92,7 @@ package xBei.Net{
 		 * @return
 		 */
 		public function GetBoolean(key:String, dv:Boolean=false):Boolean {
-			if (super[key] == null) {
+			if (this.hasOwnProperty(key) == false || this[key] == null) {
 				return dv;
 			}else {
 				var value:String = this.Get(key).toLowerCase();
