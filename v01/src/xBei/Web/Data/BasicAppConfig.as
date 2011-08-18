@@ -1,5 +1,7 @@
 package xBei.Web.Data {
 	import flash.display.LoaderInfo;
+	
+	import xBei.Net.Uri;
 
 	/**
 	 * 全局配置信息
@@ -8,7 +10,10 @@ package xBei.Web.Data {
 	 */
 	public dynamic class BasicAppConfig {
 		private var _parameters:Object;
-		
+		private var _url:Uri;
+		public function get Url():Uri{
+			return this._url;
+		}
 		private static var _instance:BasicAppConfig;
 		/**
 		 * 静态唯一实例 
@@ -26,9 +31,17 @@ package xBei.Web.Data {
 		 * @param info	一般是主文档的root.loaderInfo
 		 */
 		public function BasicAppConfig(info:LoaderInfo) {
+			this._url = new Uri(info.url);
+			//var cache:String = url.QueryString.Get('cache');
+			//trace('cache=', cache);
 			this._parameters = info.parameters;
 			_instance = this;
 			this.processParameters();
+			if(glo.bal.INIT_SETTING && this.Url.IsLocal){
+				for(var k:* in glo.bal.INIT_SETTING){
+					this[k] = glo.bal.INIT_SETTING[k];
+				}
+			}
 		}
 		
 		/**

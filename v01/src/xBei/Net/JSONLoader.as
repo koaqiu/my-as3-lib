@@ -1,5 +1,7 @@
 package xBei.Net{
 	import com.adobe.serialization.json.JSON;
+	
+	import flash.net.URLLoaderDataFormat;
 
 	/**
 	 * JSON加载器
@@ -25,7 +27,7 @@ package xBei.Net{
 			}catch (error:Error) {
 				trace('发生错误！',super.data);
 				super.OnError("解析失败！ \n"+String(error)+"\n\n"+String(super.ResultData));
-				this._data={
+				this._data = {
 					success:false,
 					result:{
 						message:'解析失败'
@@ -34,6 +36,16 @@ package xBei.Net{
 				return false;
 			}
 			return false;
+		}
+		/**
+		 * POST数据
+		 * @param url
+		 * @param dataFormat	自动忽略此参数
+		 * @param callBack
+		 */
+		override public function Post(url:String, dataFormat:String, callBack:Function = null):void{
+			trace('JSONLoader Post:',url,callBack);
+			super.Post(url, URLLoaderDataFormat.TEXT, callBack);
 		}
 		protected function encode( o:Object ):String {
 			return JSON.encode(o);

@@ -170,13 +170,13 @@ package xBei.Helper{
 		 * @return 
 		 * 
 		 */
-		public static function FormatNumber(v:int,length:int=0,mode:Boolean=false,Prefix:String ='0'):String{
+		public static function FormatNumber(v:int, length:int = 0, mode:Boolean = false, Prefix:String = '0'):String{
 			if(length == 0 || v.toString().length >= length){
 				return v.toString();
 			}else{
 				var l:int = length - v.toString().length;// Math.floor(v / 10) - 1;
 				var str:String = v.toString();
-				for(var i:int =0;i<l;i++){
+				for(var i:int = 0;i<l;i++){
 					if(mode){
 						str= str + Prefix;
 					}else{
