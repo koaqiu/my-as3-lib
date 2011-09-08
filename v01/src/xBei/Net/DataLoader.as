@@ -139,15 +139,14 @@ package xBei.Net{
 		 * 
 		 * @param	pUrl		要加载的地址
 		 * @param	timeOut		超时，0  表示使用默认值（30秒）
-		 * @param	callBack	回调函数 function(DataLoader):Boolean;
+		 * @param	callBack	回调函数 function(data:*, loader:DataLoader):Boolean;
 		 */	
 		public function Load(pUrl:*, timeOut:int = 0, callBack:Function = null):void {
+			trace('DataLoader.Load');
 			if(this._checkUrl(pUrl)){
 				_mode = 0;
 				this._initTimer(timeOut);
-				if(callBack != null){
-					this._callBack = callBack;
-				}
+				this._callBack = callBack;
 				this._timer.addEventListener(TimerEvent.TIMER, DPE_TimeOut);
 				this._timer.start();
 				super.load(_lastRq);
@@ -159,15 +158,14 @@ package xBei.Net{
 		 * @param callBack
 		 * 
 		 */		
-		public function Post(url:String, dataFormat:String, callBack:Function = null):void{
-			trace('DataLoader Post:',url,callBack);
-			this._callBack = callBack;
+		public function Post(url:String, callBack:Function = null):void{
+			trace('DataLoader.Post:',url);
 			var rq:URLRequest = new URLRequest(url);
 			rq.method = URLRequestMethod.POST;
 			rq.data = this.prepareRequest();
 			
 			super.dataFormat = dataFormat;
-			this.Load(rq);
+			this.Load(rq, 30, callBack);
 		}
 		/**
 		 * 上传文件 
@@ -260,22 +258,35 @@ package xBei.Net{
 			}
 			return qs;
 		}
-		
+		protected function runCallBackFunc(resultData:*):void{
+			trace('DataLoader.runCallBackFunc');
+			if (this._callBack != null) {
+				var cb:Function = this._callBack;
+				this._callBack = null;
+				try{
+					cb(resultData, this);
+				}catch(error:ArgumentError){
+					this.OnError('CallBack错误，正确的回调函数结构为：function(data:*,loader:*):Boolan{}');
+				}
+				trace('call back 执行完毕');
+			}else{
+				//trace('DataLoader.OnDataLoaded callback is null');
+			}
+		}
 		//Do Event
 		/**
 		 * 数据加载完毕时触发 
 		 * @return 
 		 */
-		protected function OnDataLoaded():Boolean {
+		protected function OnDataLoaded():void {
 			this._timer.removeEventListener(TimerEvent.TIMER, DPE_TimeOut);
 			this._timer.stop();
 			this.dispatchEvent(new DataLoaderEvent(DataLoaderEvent.DATA_LOADED));
-			if (this._callBack != null) {
-				return this._callBack(this);
-			}else{
-				trace('DataLoader.OnDataLoaded callback is ', this._callBack);
-			}
-			return true;
+			trace('DataLoader.OnDataLoaded');
+			this.runCallBackFunc({
+				'success':true,
+				'resultData':this.data
+			});
 		}
 		/**
 		 * 发生错误时触发 
@@ -283,21 +294,31 @@ package xBei.Net{
 		 */
 		protected function OnError(msg:String):void {
 			_errMessage = msg;
-			trace("加载错误！",msg);
+			trace('加载', this._lastRq.url,'时发生错误：', msg);
 			this._timer.removeEventListener(TimerEvent.TIMER, DPE_TimeOut);
 			this._timer.stop();
 			this.dispatchEvent(new DataLoaderEvent(DataLoaderEvent.ERROR));
-			try{this.Close();}catch(error:Error){}
+			//try{this.Close();}catch(error:Error){}
+			this.runCallBackFunc({
+				'success':false,
+				'error':DataLoaderEvent.ERROR,
+				'message':msg
+			});
 		}
 		/**
 		 * 加载超时 
 		 */
 		protected function OnTimeOut():void {
-			trace("time out",this._lastRq,this._lastRq.url);
+			trace("time out",this._lastRq.url);
 			this._timer.removeEventListener(TimerEvent.TIMER, DPE_TimeOut);
 			this._timer.stop();
-			try{this.Close();}catch(error:Error){}
+			//try{this.Close();}catch(error:Error){}
 			this.dispatchEvent(new DataLoaderEvent(DataLoaderEvent.TIME_OUT));
+			this.runCallBackFunc({
+				'success':false,
+				'error':DataLoaderEvent.TIME_OUT,
+				'message':'timeout'
+			});
 		}
 		/**
 		 * 网络离线 
@@ -305,9 +326,11 @@ package xBei.Net{
 		protected function OnOffline():void {
 			this._timer.removeEventListener(TimerEvent.TIMER, DPE_TimeOut);
 			this._timer.stop();
-			//trace('%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 0');
-			//try{this.Close();}catch(error:Error){}
 			this.dispatchEvent(new DataLoaderEvent(DataLoaderEvent.OFFLINE));
+			this.runCallBackFunc({
+				'success':false,
+				'message':'offline'
+			});
 		}
 		//Events
 		private function DPE_DataLoaded(e:Event):void {

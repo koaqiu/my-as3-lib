@@ -6,6 +6,7 @@
 	
 	import gs.TweenLite;
 	
+	import xBei.Helper.StringHelper;
 	import xBei.Manager.HotKeyManager;
 	import xBei.Manager.MessageManager;
 	
@@ -14,8 +15,9 @@
 	 * @author KoaQiu
 	 */
 	public class LightBoxManager {
-		private static var _curWin:LBWin;
+		//private static var _curWin:LBWin;
 		private static var _winList:Vector.<LBWin>;
+		//private static var _winIDList:Vector.<int>;
 		
 		private static var _showing:Boolean = false;
 		/**
@@ -45,6 +47,11 @@
 				c[k] = _initArgs[k];
 			}
 			return c;
+		}
+		private static var __id_creator:int = 0;
+		public static function NewID():int{
+			LightBoxManager.__id_creator++;
+			return LightBoxManager.__id_creator;
 		}
 		/**
 		 * 初始化管理器
@@ -79,20 +86,24 @@
 			
 			LightBoxManager._initArgs = _args;
 			LightBoxManager._winList = new Vector.<LBWin>();
+			//LightBoxManager._winIDList = new Vector.<int>();
 		}
 		/**
 		 * 显示一个模式窗口
 		 * @param	win
 		 */
 		internal static function ShowWin(win:LBWin):void {
+			trace('显示：',win.ID);
 			var index:int = LightBoxManager._winList.indexOf(win);
 			if(index >= 0){
 				trace('已经存在列表中....');
 				LightBoxManager._winList.splice(index, 1);
+				//LightBoxManager._winIDList.splice(index, 1);
 			}
 			LightBoxManager._winList.push(win);
-			LightBoxManager._curWin = win;
-			
+			//LightBoxManager._winIDList.push(win.ID);
+			//LightBoxManager._curWin = win;
+			////全局禁用热键
 			MessageManager.SendMessage(0xE0000000);
 			
 			//初始化.参数
@@ -132,6 +143,7 @@
 
 			win.visible = false;
 			win._mask = new Sprite();
+			win._mask.name = StringHelper.Format('LightBox_Mask_{0}', win.ID);
 			stage.addChild(win._mask);
 			stage.addChild(win); 
 			
@@ -262,12 +274,12 @@
 			}
 			//*/
 			
-			trace('LightBoxManager.Hide canClose=', tmpWin.canClose, 'isshow=', tmpWin.IsShow)
+			trace('LightBoxManager.Hide canClose=', tmpWin.canClose, 'isshow=', tmpWin.IsShow, tmpWin.ID)
 			if (tmpWin.canClose == false || tmpWin.IsShow == false) {
 				return;
 			}
 			
-			//trace("开始关闭 LightBox");
+			trace("开始关闭 LightBox");
 			if(tmpWin._args.CloseButton){
 				//第一步 隐藏按钮
 				TweenLite.to(tmpWin.btnClose, .3, {
@@ -293,46 +305,86 @@
 				onComplete:function(pWin:LBWin):void {
 					//第三步 隐藏遮罩
 					//trace(win, win._mask, mask_click);
-					pWin._mask.removeEventListener(MouseEvent.CLICK, mask_click);
-					TweenLite.to(win._mask, .4, { 
-						autoAlpha:0,
-						onCompleteParams:[pWin],
-						onComplete:function(ppWin:LBWin):void {
-							//启用快捷键
-							//事件
-							ppWin.onHide();
-							ppWin._mask.parent.removeChild(ppWin._mask);
-							ppWin._mask = null;
-							//移除对象
-							if(ppWin.parent != null){
-								ppWin.parent.removeChild(ppWin);
-							}
-							if (ppWin._args.noDispose == false) {
-								if(ppWin._args.CloseButton){
-									ppWin.btnClose.removeEventListener(MouseEvent.CLICK, mask_click);
-								}
-								ppWin.dispose();
-							}
-							LightBoxManager._winList.pop();
-							if(LightBoxManager._winList.length == 0){
-								MessageManager.SendMessage(0xE0000001);
-							}else{
-								MessageManager.SendMessage(0xE0000000);	
-							}
-						}
-					} );
+					if(pWin._mask != null){
+						pWin._mask.removeEventListener(MouseEvent.CLICK, mask_click);
+						TweenLite.to(win._mask, .4, { 
+							autoAlpha:0,
+							onCompleteParams:[pWin],
+							onComplete:_hide_2
+						} );
+					}else{
+						trace('mask is null');
+						_hide_2(pWin);
+						//pWin.onHide();
+						//移除对象
+						//if(pWin.parent != null){
+						//	pWin.parent.removeChild(pWin);
+						//}
+						//if (pWin._args.noDispose == false) {
+						//	if(pWin._args.CloseButton){
+						//		pWin.btnClose.removeEventListener(MouseEvent.CLICK, mask_click);
+						//	}
+						//	pWin.dispose();
+						//}
+						//LightBoxManager._winList.pop();
+						//if(LightBoxManager._winList.length == 0){
+						//	MessageManager.SendMessage(0xE0000001);
+						//}else{
+						//	MessageManager.SendMessage(0xE0000000);	
+						//}
+					}
 					//窗口恢复原始状态
 					//TweenLite.to(win, .1, { removeTint:true,scaleX:.04,scaleY:.04} );
 				}
 			});
 		}
-		private static function mask_click(e:MouseEvent):void {
-			trace('LightBoxManager.Mask clicked');
-			if(_curWin != null){
-				trace('_curWin.IsShow=',_curWin.IsShow)
+		private static function _hide_2(pWin:LBWin):void {
+			//启用快捷键
+			//事件
+			pWin.onHide();
+			if(pWin._mask != null && pWin._mask.parent != null){
+				pWin._mask.parent.removeChild(pWin._mask);
 			}
-			if(_curWin == null || _curWin.IsShow)
-			LightBoxManager.Hide();
+			pWin._mask = null;
+			//移除对象
+			if(pWin.parent != null){
+				pWin.parent.removeChild(pWin);
+			}
+			if (pWin._args.noDispose == false) {
+				if(pWin._args.CloseButton){
+					pWin.btnClose.removeEventListener(MouseEvent.CLICK, mask_click);
+				}
+				pWin.dispose();
+			}
+			LightBoxManager._winList.pop();
+			if(LightBoxManager._winList.length == 0){
+				//全局启用用热键
+				MessageManager.SendMessage(0xE0000001);
+			}else{
+				//全局禁用热键
+				MessageManager.SendMessage(0xE0000000);	
+			}
+			trace("完成关闭 LightBox");
 		}
-	}
-}
+		private static function mask_click(e:MouseEvent):void {
+			trace('LightBoxManager.Mask clicked', e.target.name);
+			var win:LBWin;
+			if(e.target is SimpleButton){
+				win = e.target.parent as LBWin;
+				LightBoxManager.Hide(win);
+			}else{
+			var l:int = LightBoxManager._winList.length;
+			for(var i:int = l - 1; i >= 0; i--){
+				win = LightBoxManager._winList[i];
+				trace('Vector.every:', i);
+				if(win._mask == e.target){
+					trace('_curWin.IsShow=', win.IsShow, win.ID)
+					//if(win.IsShow)
+						LightBoxManager.Hide(win);
+					break;
+				}
+			}//end for
+			}
+		}//end function
+	}//end class
+}//end package

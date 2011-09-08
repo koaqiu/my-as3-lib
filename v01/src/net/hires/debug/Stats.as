@@ -75,6 +75,7 @@ package net.hires.debug {
 		 * @param _theme         Example: { bg: 0x202020, fps: 0xC0C0C0, ms: 0x505050, mem: 0x707070, memmax: 0xA0A0A0 }
 		 */
 		public function Stats( _theme : Object = null ):void {
+			this.mouseChildren = this.mouseEnabled = false;
 			if (_theme) {
 				if (_theme.bg != null)
 					theme.bg = _theme.bg;
