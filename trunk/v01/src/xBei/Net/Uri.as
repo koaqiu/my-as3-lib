@@ -1,4 +1,8 @@
 package xBei.Net{
+	import flash.events.*;
+	import flash.net.*;
+	import flash.utils.Timer;
+	
 	import xBei.Helper.StringHelper;
 
 	/**
@@ -101,6 +105,92 @@ package xBei.Net{
 			return _uv;
 		}
 		
+		public static function Test(url:String, callBack:Function):void{
+			var isCb:Boolean = false;
+			var http_status:Function = function(e:HTTPStatusEvent):void{
+				//trace(e,url,isCb);
+				time.stop();
+				if(isCb)return;isCb = true;
+				if(e.status == 200){
+					callBack({
+						'url':url,
+						'success':true
+					});
+				}else if(e.status == 404){
+					callBack({
+						'url':url,
+						'success':false,
+						'error':404
+					});
+				}else if(e.status == 403){
+					callBack({
+						'url':url,
+						'success':false,
+						'error':403
+					});
+				}else if(e.status >= 500 && e.status < 600){
+					callBack({
+						'url':url,
+						'success':false,
+						'error':'服务器错误'
+					});
+				}
+			};
+			var io_error:Function = function(e:IOErrorEvent):void{
+				//trace(e,url,isCb);
+				time.stop();
+				if(isCb)return;isCb = true;
+				callBack({
+					'url':url,
+					'success':false,
+					'error':e.type
+				});
+			};
+			var security_error:Function = function(e:SecurityErrorEvent):void{
+				//trace(e,url,isCb);
+				time.stop();
+				if(isCb)return;isCb = true;
+				callBack({
+					'url':url,
+					'success':false,
+					'error':e.type
+				});
+			};
+			var complete:Function = function(e:Event):void{
+				//trace(e,url,isCb);
+				time.stop();
+				if(isCb)return;isCb = true;
+				callBack({
+					'url':url,
+					'success':true
+				});
+			};
+			var open:Function = function(e:Event):void{
+				//if(isCb)return;isCb = true;
+				//trace(e,url,isCb);
+				time.stop();
+			};
+			var timeout:Function = function(e:TimerEvent):void{
+				//trace(e,url,isCb);
+				time.stop();
+				if(isCb)return;isCb = true;
+				callBack({
+					'url':url,
+					'success':false,
+					'error':'timeout'
+				});
+			};
+			var time:Timer = new Timer(30000);
+			time.addEventListener(TimerEvent.TIMER, timeout);
+			var loader:URLLoader = new URLLoader();
+			loader.addEventListener(HTTPStatusEvent.HTTP_STATUS, http_status);
+			loader.addEventListener(IOErrorEvent.IO_ERROR, io_error);
+			loader.addEventListener(SecurityErrorEvent.SECURITY_ERROR, security_error);
+			loader.addEventListener(Event.COMPLETE, complete);
+			loader.addEventListener(Event.OPEN, open);
+			loader.load(new URLRequest(url));
+			time.start();
+		}
 		public function Uri(url:String = null){
 			if(url != null){
 				//分解Uri各部分

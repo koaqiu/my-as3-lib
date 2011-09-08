@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<flexLibProperties includeAllClasses="true" version="3">
+<flexLibProperties includeAllClasses="true" useMultiPlatformConfig="false" version="3">
   <includeClasses>
     <classEntry path="xBei.Helper.ImageHelper"/>
     <classEntry path="xBei.Helper.KeyHelper"/>
@@ -26,7 +26,6 @@
     <classEntry path="xBei.Interface.IFont"/>
     <classEntry path="xBei.Fonts.FontStyles"/>
     <classEntry path="xBei.Helper.MathHelper"/>
-    <classEntry path="xBei.Interface.IDispose"/>
     <classEntry path="xBei.Helper.XmlHelper"/>
     <classEntry path="xBei.AnimationMode"/>
     <classEntry path="xBei.UI.XSprite"/>
@@ -42,6 +41,7 @@
     <classEntry path="xBei.Net.XLoader"/>
     <classEntry path="xBei.Interface.IClone"/>
     <classEntry path="xBei.Manager.CloneManager"/>
+    <classEntry path="xBei.Data.SQLConnectionXP"/>
   </includeClasses>
   <includeResources/>
   <namespaceManifests/>

@@ -80,6 +80,13 @@
 		public static function get IsDir():Boolean {
 			return Capabilities.playerType == "DirectorXtra";
 		}
+		/**
+		 * 是否在Air环境下
+		 * @return 
+		 */
+		public static function get IsAir():Boolean {
+			return (Capabilities.playerType == 'Desktop');
+		}
 		//方法
 		/**
 		* 向Dir发送命令

@@ -9,43 +9,36 @@ package xBei.Net{
 	 * @see xBei.Events.DataLoaderEvent
 	 */
 	public class JSONLoader extends DataLoader {
-		private var _data:*;
+		private var _jsonData:*;
 		/**
 		 * JSON对象，加载成功后有效
 		 */
 		public function get JSONObject():*{
-			if (_data == null) {
+			if (_jsonData == null) {
 				return null;
 			}else {
-				return _data;
+				return _jsonData;
 			}
 		}
-		override protected function OnDataLoaded():Boolean {
+		override protected function runCallBackFunc(resultData:*):void{
+			trace('JSONLoader.runCallBackFunc');
+			resultData['resultData'] = this.JSONObject;
+			super.runCallBackFunc(resultData);
+		}
+		override protected function OnDataLoaded():void {
+			trace('JSONLoader.OnDataLoaded');
 			try {
-				this._data = JSON.decode(super.ResultData);
-				return super.OnDataLoaded();
+				this._jsonData = decode(this.ResultData);
+				super.OnDataLoaded();
+			}catch(error:ArgumentError){
+				trace('参数错误：',error.toString());
 			}catch (error:Error) {
-				trace('发生错误！',super.data);
 				super.OnError("解析失败！ \n"+String(error)+"\n\n"+String(super.ResultData));
-				this._data = {
-					success:false,
-					result:{
-						message:'解析失败'
-					}
+				this._jsonData = {
+					'success':false,
+					'message':'解析失败'
 				}
-				return false;
 			}
-			return false;
-		}
-		/**
-		 * POST数据
-		 * @param url
-		 * @param dataFormat	自动忽略此参数
-		 * @param callBack
-		 */
-		override public function Post(url:String, dataFormat:String, callBack:Function = null):void{
-			trace('JSONLoader Post:',url,callBack);
-			super.Post(url, URLLoaderDataFormat.TEXT, callBack);
 		}
 		protected function encode( o:Object ):String {
 			return JSON.encode(o);

@@ -38,7 +38,10 @@
 		public var _args:Object;
 		internal var _mask:Sprite;
 		public var canClose:Boolean = true;
-		
+		private var _id:int;
+		public function get ID():int{
+			return this._id;
+		}
 		/**
 		 * ClickMaskClose:true,
 		 * CloseButton:true,
@@ -54,6 +57,7 @@
 		public function LBWin() {
 			super();
 			_args = LightBoxManager.InitArgs();
+			this._id = LightBoxManager.NewID();
 			stop();
 			this.addEventListener(KeyboardEvent.KEY_UP, DPE_KeyUp);
 		}
