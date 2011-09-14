@@ -14,16 +14,25 @@ package xBei.Net{
 	public class Uri{
 		private var _isLocal:Boolean = false;
 		/**
-		 * 是否本地地址 （file:///开头）
+		 * 是否本地地址 （file:///开头或者localhost主机）
 		 * @return 
 		 */
 		public function get IsLocal():Boolean{
 			return _isLocal;
 		}
-
+		public function get IsLoacalHost():Boolean{
+			return this.Host == 'localhost' || this.Host == '127.0.0.1';
+		}
 		private var _valid:Boolean = false;
-		
+		private var _url:String;
 		private var _scheme:String = 'unknown';
+		/**
+		 * 协议，目前支持http、https、ftp、mailto
+		 * @return 
+		 */		
+		public function get Scheme():String{
+			return this._scheme;
+		}
 		private var _authority:String = "";
 		private var _username:String = "";
 		private var _password:String = "";
@@ -32,7 +41,6 @@ package xBei.Net{
 		/**
 		 * 主机名 
 		 * @return 
-		 * 
 		 */
 		public function get Host():String{
 			return _host;
@@ -47,7 +55,6 @@ package xBei.Net{
 		 * 端口
 		 * @default 80 
 		 * @return 
-		 * 
 		 */
 		public function get Port():int{
 			return _port;
@@ -62,7 +69,6 @@ package xBei.Net{
 		/**
 		 * 路径 
 		 * @return 
-		 * 
 		 */
 		public function get Path():String{
 			return _path;
@@ -79,6 +85,32 @@ package xBei.Net{
 			}
 			if(_path.charAt(_path.length-1) != '/'){
 				_path = _path + '/';
+			}
+		}
+		/**
+		 * 忽略问号“？”后面的任何内容
+		 * @param value
+		 */	
+		public function set FullPath(value:String):void{
+			if(StringHelper.IsNullOrEmpty(value)){
+				throw new ArgumentError('参数不能会空（null）');
+			}
+			var i1:int = value.lastIndexOf('?');
+			if(i1 == 0){
+				throw new ArgumentError('参数错误！');
+			}else if(i1 > 0){
+				value = value.substr(0, i1);
+			}
+			i1 = value.lastIndexOf('/');
+			if(i1 == -1){
+				this._path = '/';
+				this._file = value;
+			}else if(i1 == 0){
+				this._path = '/';
+				this._file = value.replace(/\//ig, '');
+			}else{
+				this.Path = value.substr(0, i1);
+				this._file = value.substr(i1 + 1);
 			}
 		}
 
@@ -192,9 +224,9 @@ package xBei.Net{
 			time.start();
 		}
 		public function Uri(url:String = null){
-			if(url != null){
+			if(StringHelper.IsNullOrEmpty(url) == false){
 				//分解Uri各部分
-				_valid = this._parseUrl(url);
+				_valid = this._parseUrl(url.replace(/\\/ig,'/').replace(/\/{1}/ig,'/'));//''
 				if(_valid){
 					this._parseQuery();
 				}else{
@@ -205,6 +237,7 @@ package xBei.Net{
 		
 		private function _parseUrl(url:String):Boolean{
 			//trace('解析：',url);
+			this._url = url;
 			var index:int = url.indexOf('#');
 			if(index != -1){
 				if(url.length > index + 1){
@@ -313,6 +346,11 @@ package xBei.Net{
 			}
 			_uv.Add(key,value);
 		}
+		/**
+		 * 该地址是否在某个域
+		 * @param domain
+		 * @return 
+		 */		
 		public function IsInDomain(domain:String):Boolean{
 			if(StringHelper.IsNullOrEmpty(domain)){
 				return false;
@@ -341,6 +379,59 @@ package xBei.Net{
 			_uv.Remove(key);
 		}
 		/**
+		 * 合并路径
+		 * @param path	要合并的路径，“/”开头表示绝对路径，“～/”开头表示使用当前Uri的目录作为跟，其他开头则为相对路径
+		 * 不同域或不同协议直接返回path的Uri
+		 * @return 返回合并好的路径
+		 */		
+		public function Combine(path:*):Uri{
+			if(path == null)throw new ArgumentError('参数不能会空（null）');
+			var pUri:Uri;
+			if(path is Uri) 
+				path as Uri;
+			else
+				pUri = new Uri(String(path));
+			if(pUri._validateURI()){
+				return pUri;
+			}else{
+				var strPath:String = String(path);
+				var r:Uri = new Uri(this.toString());
+				if(strPath.indexOf('/') == 0){
+					//“/”开头表示绝对路径
+					r.FullPath = strPath;
+				}else if(strPath.indexOf('~/') == 0){
+					//“～/”开头表示使用当前Uri的目录作为根
+					r.FullPath = r.Path + strPath.substr(2);
+				}else if(strPath.indexOf('./') == 0){
+					r.FullPath = r.Path + strPath.substr(2);
+				}else if(strPath.indexOf('../') == 0){
+					var lp:int = 1;
+					var tp:String = strPath.substr(3);
+					while(tp.indexOf('../') == 0){
+						lp++;
+						tp = tp.substr(3);
+					}
+					var parr:Array = r.Path.split('/');
+					var rlp:int = parr.length - 2;
+					if(lp > rlp){
+						throw new ArgumentError('相对路径错误，没有那么多层');
+					}
+					for(var i:int = 0; i < lp; i++){
+						parr.pop();
+					}
+					parr.pop();
+					if(parr.length < 2){
+						r.FullPath = '/' + tp;
+					}else{
+						r.FullPath =  parr.join('/') + '/' + tp;
+					}
+				}else{
+					r.FullPath = r.Path + strPath;
+				}
+				return r;
+			}
+		}
+		/**
 		 * 销毁对象
 		 */
 		public function dispose():void {
@@ -361,11 +452,13 @@ package xBei.Net{
 			var sScheme:String = 'http://';
 			if(_scheme == 'file'){
 				sScheme = 'file:///';
+			}else if(this._scheme == 'mailto'){
+				sScheme = 'mailto:';
 			}else if(_scheme.length > 0){
-				sScheme = _scheme + '//';
+				sScheme = _scheme + '://';
 			}
 			var sAuthority:String = '';
-			if(_username.length > 0){
+			if(this.IsLocal == false && _username.length > 0){
 				if(_password.length > 0){
 					sAuthority = _username + ':' + _password + '@';
 				}else{
@@ -374,10 +467,11 @@ package xBei.Net{
 			}
 			
 			var sPort:String = '';
-			if(_port != 80){
+			if((this._scheme == 'http' && _port != 80) ||
+				(this._scheme == 'https' && _port != 443) ||
+				(this._scheme == 'ftp' && _port != 21)){
 				sPort = ':' + _port.toString();
 			}
-			
 			var sPath:String = '/';
 			if(_path.length > 0){
 				sPath = _path;
@@ -392,7 +486,12 @@ package xBei.Net{
 				sFragment = '#' + _fragment;
 			}
 			
-			return sScheme + sAuthority + _host + sPort + sPath + _file + sQuery + sFragment;
+			var s:String = sScheme + sAuthority + _host;
+			if(this.IsLocal){
+				s += '|';
+			}
+			s += sPort + sPath + _file + sQuery + sFragment;
+			return s;
 		}
 	}
 }
