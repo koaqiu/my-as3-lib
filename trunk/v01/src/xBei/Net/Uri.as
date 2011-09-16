@@ -226,7 +226,7 @@ package xBei.Net{
 		public function Uri(url:String = null){
 			if(StringHelper.IsNullOrEmpty(url) == false){
 				//分解Uri各部分
-				_valid = this._parseUrl(url.replace(/\\/ig,'/').replace(/\/{1}/ig,'/'));//''
+				_valid = this._parseUrl(url.replace(/\\{1}/ig,'/'));//''
 				if(_valid){
 					this._parseQuery();
 				}else{
@@ -243,7 +243,7 @@ package xBei.Net{
 				if(url.length > index + 1){
 					_fragment = url.substr(index + 1);
 				}
-				url = url.substring(0,index - 1);
+				url = url.substring(0, index - 1);
 			}
 			index = url.indexOf('?');
 			if(index != -1){
@@ -255,37 +255,49 @@ package xBei.Net{
 			
 			//开始检查协议
 			var reg:RegExp = new RegExp('^([a-z]+):(/{2,3}).+','i');
+			var fileReg:RegExp = /^[a-z]:[\\\/]/ig;
 			if(reg.test(url)){
 				var match:Object = reg.exec(url);
 				_scheme = match[1].toLocaleLowerCase();
-				_isLocal = _scheme == 'file' && match[2] == '///';
+				this._isLocal = _scheme == 'file' && match[2] == '///';
 				
 				url = url.substr(_scheme.length + match[2].length + 1);
 				//trace('检查协议：',url);
+			}else if(fileReg.test(url)){
+				_scheme = 'file';
+				this._isLocal = true;
+				//var m_file:Object = fileReg.exec(url);
+				//url = url.substr(m_file.length);
 			}
-			//检查端口
-			var regPort:RegExp = new RegExp(':(\\d+)');
-			if(regPort.test(url)){
-				var mP:Object = regPort.exec(url);
-				_port = int(mP[1]);
-				url = url.replace(regPort,'');
-				//trace('检查端口：',_port);
-			}
-			//检查用户
-			var regUser:RegExp = new RegExp('^([^:]+):{0,1}(.+){0,1}@.+','i');
-			if(regUser.test(url)){
-				var mU:Object = regUser.exec(url);
-				_username = mU[1];
-				_password = mU[2];
-				
-				index = _username.length + 1;
-				if(_password.length > 0){
-					index +=_password.length + 1;
+			if(this._isLocal == false){
+				//检查端口
+				var regPort:RegExp = new RegExp(':(\\d+)');
+				if(regPort.test(url)){
+					var mP:Object = regPort.exec(url);
+					_port = int(mP[1]);
+					url = url.replace(regPort,'');
+					//trace('检查端口：',_port);
+				}else{
+					_port = PORT[_scheme];
 				}
-				
-				url = url.substr(index);
-			}
 			
+				//检查用户
+				var regUser:RegExp = new RegExp('^([^:]+):{0,1}(.+){0,1}@.+','i');
+				if(regUser.test(url)){
+					var mU:Object = regUser.exec(url);
+					_username = mU[1];
+					_password = mU[2];
+					
+					index = _username.length + 1;
+					if(_password.length > 0){
+						index +=_password.length + 1;
+					}
+					
+					url = url.substr(index);
+				}
+			}else{
+				_port = 0;
+			}
 			//if(url.indexOf(':') != 0){
 			//	trace('格式错误！',url);
 			//	return false;
@@ -294,14 +306,17 @@ package xBei.Net{
 			//解析路径
 			index = url.indexOf('/');
 			if(index > 0){
-				_host = url.substring(0, index - 1);
+				_host = url.substring(0, index).replace(/[\|:]/ig,'');
 				if(url.length > index + 1){
 					_path = url.substr(index);
 					
-					var tmpAff:Array = _path.split('/');
+					var tmpAff:Array = _path.split('/').filter(function(str:String, index:int, arr:Array):Boolean{
+						return !StringHelper.IsNullOrEmpty(str);
+					});
+					
 					if(tmpAff[tmpAff.length - 1].length > 0){
 						_file = String(tmpAff.pop());
-						_path = tmpAff.join('/') + '/';
+						_path = '/' + tmpAff.join('/') + '/';
 					}
 					
 				}
@@ -321,6 +336,13 @@ package xBei.Net{
 					_uv = new RequestQueryString(err.message);
 				}
 			}
+		}
+		private var PORT:Object={
+			'http':80,
+			'https':443,
+			'ftp':21,
+			'file':0,
+			'mailto':0
 		}
 		private function _validateURI():Boolean{
 			if(['','http','https','ftp','file','mailto'].indexOf(_scheme) == -1){
