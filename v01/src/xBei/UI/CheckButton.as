@@ -3,7 +3,7 @@ package xBei.UI
 	import flash.events.*;
 	import flash.filters.*;
 
-	[Event(name = "change", type = "flash.Events.Event")]
+	[Event(name = "change", type = "flash.events.Event")]
 	public class CheckButton extends XMovieClip
 	{
 		private var _checked:Boolean = false;

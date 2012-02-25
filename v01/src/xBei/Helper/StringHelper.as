@@ -78,8 +78,8 @@ package xBei.Helper{
 		 * @return 
 		 * 
 		 */		
-		public static function Substitute(text:String,object:Object, regexp:RegExp):String{
-			return text.replace(regexp || (/\\?\{([^{}]+)\}/g), function(match:*, name:String):String{
+		public static function Substitute(text:String,object:Object, regexp:RegExp = null):String{
+			return text.replace(regexp || (/\\?\{([^{}]+)\}/g), function(match:*, name:String, index:Number, text:String):String{
 				if (match.charAt(0) == '\\') return match.slice(1);
 				return (object[name] != null) ? object[name] : '';
 			});

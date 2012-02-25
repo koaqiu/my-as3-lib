@@ -2,6 +2,7 @@ package xBei.Net{
 	import com.adobe.serialization.json.JSON;
 	
 	import flash.net.URLLoaderDataFormat;
+	import flash.system.Capabilities;
 
 	/**
 	 * JSON加载器
@@ -21,30 +22,53 @@ package xBei.Net{
 			}
 		}
 		override protected function runCallBackFunc(resultData:*):void{
-			trace('JSONLoader.runCallBackFunc');
-			resultData['resultData'] = this.JSONObject;
+			//trace('JSONLoader.runCallBackFunc');
+			if(this.dataFormat == URLLoaderDataFormat.TEXT){
+				resultData['resultData'] = this.JSONObject;				
+			}
 			super.runCallBackFunc(resultData);
 		}
 		override protected function OnDataLoaded():void {
-			trace('JSONLoader.OnDataLoaded');
-			try {
-				this._jsonData = decode(this.ResultData);
+			if(this.dataFormat == URLLoaderDataFormat.BINARY){
 				super.OnDataLoaded();
-			}catch(error:ArgumentError){
-				trace('参数错误：',error.toString());
-			}catch (error:Error) {
-				super.OnError("解析失败！ \n"+String(error)+"\n\n"+String(super.ResultData));
-				this._jsonData = {
-					'success':false,
-					'message':'解析失败'
+			}else{
+				try {
+					this._jsonData = decode(this.ResultData);
+					super.OnDataLoaded();
+				}catch(error:ArgumentError){
+					//trace('参数错误：',error.toString());
+					super.OnError("参数错误： \n"+String(error)+"\n\n"+String(super.ResultData));
+					this._jsonData = {
+						'success':false,
+						'message':'参数错误'
+					}
+				}catch (error:Error) {
+					//trace('错误！',error, this.ResultData);
+					super.OnError("解析失败！ \n"+String(error)+"\n\n"+String(super.ResultData));
+					this._jsonData = {
+						'success':false,
+						'message':'解析失败'
+					}
 				}
 			}
 		}
 		protected function encode( o:Object ):String {
-			return JSON.encode(o);
+			//var player_version:int = int(Capabilities.version.substr(3).split(',')[0]);
+			//if(player_version >=11){
+			//	return glo.EncodeJson(o);
+			//}else{
+				return com.adobe.serialization.json.JSON.encode(o);
+			//}
 		}
 		protected function decode( s:String ):* {
-			return JSON.decode(s);
+			//trace(Capabilities.version);
+			//var player_version:int = int(Capabilities.version.substr(3).split(',')[0]);
+			//if(player_version >=11){
+			//	return glo.DecodeJson(s);
+			//}else{
+				return com.adobe.serialization.json.JSON.decode(s);
+			//}
+			//return JSON.decode(s);
 		}
 	}
 }

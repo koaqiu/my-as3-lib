@@ -175,7 +175,6 @@
 			}
 			if(tmp.indexOf(listener)==-1){
 				tmp.push(listener);
-				//trace(MESSAGE.toString(16), '-----------------------------------',tmp[tmp.length-1]);
 				return SUCCEED;
 			}else {
 				//已经存在

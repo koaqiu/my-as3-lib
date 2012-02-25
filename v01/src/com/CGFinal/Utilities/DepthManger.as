@@ -31,6 +31,7 @@
 		 * @return	返回值为：{depth:深度, index:系列引索}
 		 */ 
 		public static function addAt(doc:DisplayObjectContainer, child:DisplayObject, depth:int,add:Boolean=true):void {
+			throw new Error('请使用新类：xBei.Manager.DepthManager');
 			var t1:int = -1;
 			var l:int = doc.numChildren;
 			

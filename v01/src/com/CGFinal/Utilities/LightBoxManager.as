@@ -59,6 +59,7 @@
 		 * @param args
 		 */		
 		public static function Init(stage:Stage,args:Object):void{
+			throw new Error('请使用新类：xBei.UI.Window');
 			_stage = stage;
 			//初始化.参数
 			var _args:Object = {

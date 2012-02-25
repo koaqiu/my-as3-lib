@@ -42,6 +42,15 @@
     <classEntry path="xBei.Interface.IClone"/>
     <classEntry path="xBei.Manager.CloneManager"/>
     <classEntry path="xBei.Data.SQLConnectionXP"/>
+    <classEntry path="xBei.Helper.UriHelper"/>
+    <classEntry path="xBei.Interface.IModel"/>
+    <classEntry path="xBei.UI.Window"/>
+    <classEntry path="xBei.Data.WindowInitData"/>
+    <classEntry path="xBei.Manager.StageManager"/>
+    <classEntry path="xBei.UI.LinkSplitPager"/>
+    <classEntry path="xBei.Helper.ColorHelper"/>
+    <classEntry path="xBei.Manager.ResourcesManager"/>
+    <classEntry path="xBei.Net.PostFileItem"/>
   </includeClasses>
   <includeResources/>
   <namespaceManifests/>

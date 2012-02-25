@@ -56,6 +56,7 @@
 		 */
 		public function LBWin() {
 			super();
+			throw new Error('请使用新类：xBei.UI.Window');
 			_args = LightBoxManager.InitArgs();
 			this._id = LightBoxManager.NewID();
 			stop();
@@ -79,7 +80,7 @@
 		 * @param	stage
 		 * @param	args
 		 */
-		public function Show(stage:Stage, args:Object = null):void {
+		public function Show(pStage:Stage, args:Object = null):void {
 			this.alpha = 1;
 			this.visible = true;
 			this.scaleX = this.scaleY = 1;
@@ -94,7 +95,7 @@
 			
 			this.CreateChildren();
 			this.onBeforeShow();
-			stage.addChild(this);
+			pStage.addChild(this);
 			if (this._args.CloseButton) {
 				if (StringHelper.IsNullOrEmpty(this._args.ClouseButtonName)) {
 					this.btnClose = new (getDefinitionByName(this._args.ClouseButtonClass) as Class);

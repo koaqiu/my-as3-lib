@@ -12,7 +12,6 @@ package xBei.Helper{
 	/**
 	 * 一组图形处理的静态方法 
 	 * @author KoaQiu
-	 * 
 	 */
 	public class ImageHelper{
 		/**
@@ -35,6 +34,11 @@ package xBei.Helper{
 			//var _encoder:PNGEncoder = new PNGEncoder();
 			return PNGEncoder.encode(bit);
 		}
+		/**
+		 * 从二进制数据中读取位图
+		 * @param data
+		 * @param callBack	读取成功以后返回，function(bitmap:Bitmap):void
+		 */		
 		public static function BtyesToBitmap(data:ByteArray,callBack:Function):void{
 			var bitmapData:BitmapData;
 			var loader : Loader = new Loader();
@@ -88,7 +92,6 @@ package xBei.Helper{
 		 * 2位16进制数，低位表示水平，高位表示垂直，如果是0表示使用默认值（居中）
 		 * </p>
 		 * @return 
-		 * 
 		 */
 		public static function TestRect(inputWidth:Number, 
 										inputHeight:Number, 
@@ -104,14 +107,24 @@ package xBei.Helper{
 				return new Rectangle(0, 0, inputWidth, inputHeight);
 			}
 			var r:Rectangle;
+			var _scale:Number = inputWidth / inputHeight;
+			var _rect_scale:Number = containerWidth / containerHeight;
+			var end_w:Number = inputWidth;
+			var end_h:Number = inputHeight;
+			
 			if (inputWidth < containerWidth && inputHeight < containerHeight) {
 				r = new Rectangle(0, 0, inputWidth, inputHeight);
 				//trace('元素图片比目标文件小！');
+			}else if(location >= 0x100){
+				if (_scale > _rect_scale) {
+					end_h = containerHeight;
+					end_w = end_h * _scale;
+				}else{
+					end_w = containerWidth;
+					end_h = end_w / _scale;
+				}
+				r = new Rectangle(0, 0, end_w, end_h);
 			}else{
-				var _scale:Number = inputWidth / inputHeight;
-				var _rect_scale:Number = containerWidth / containerHeight;
-				var end_w:Number = inputWidth;
-				var end_h:Number = inputHeight;
 				if (_scale > _rect_scale) {
 					end_w = containerWidth;
 					end_h = end_w / _scale;
@@ -158,10 +171,10 @@ package xBei.Helper{
 		 * @param iw		
 		 * @param ih
 		 * @return 
-		 * 
 		 */
 		public static function ScaleBitmap(source:DisplayObject, width:Number, height:Number,iw:Number=0,ih:Number=0):BitmapData {
-			var s:Number = source.scaleX;
+			var s1:Number = source.scaleX;
+			var s2:Number = source.scaleY;
 			source.scaleX = source.scaleY = 1;
 			if (iw == 0) { iw = source.width; }
 			if (ih == 0) { ih = source.height; }
@@ -190,7 +203,7 @@ package xBei.Helper{
 			var scaleY:Number = toSize.height / ih;
 			var bd:BitmapData = new BitmapData(toSize.width, toSize.height, true, 0x00ffffff);
 			var m:Matrix = new Matrix();
-			m.translate(iw / 2, ih / 2);
+			//m.translate(iw / 2, ih / 2);
 			m.scale(scaleX, scaleY);
 			
 			//m.scale(toSize.width / iw, toSize.height / ih);
@@ -200,8 +213,112 @@ package xBei.Helper{
 			//m.translate(toSize.width / 2,toSize.height /2);
 			//m.rotate(source.rotation);
 			bd.draw(source, m,null,null,null,true);
-			source.scaleX = source.scaleY = s;
+			source.scaleX = s1;source.scaleY = s2;
 			return bd;
+		}
+		
+		/**
+		 * 绘制网格线
+		 * @param g
+		 * @param rect		绘制范围
+		 * @param styles	网格线的样式，数组
+		 */		
+		public static function DrawGridLine(g:Graphics, rect:Rectangle, styles:Array = null):void{
+			//校验，step，color为必要属性
+			if(style != null && styles.length > 0){
+				styles = styles.filter(function(item:Object, index:int, arr:Array):Boolean{
+					if(item.hasOwnProperty('step') &&
+						item.hasOwnProperty('color')){
+						try{
+							item.step = uint(item.step);
+							item.color = uint(item.color);
+						}catch(err:Error){
+							return false;
+						}
+						
+						if(item.hasOwnProperty('alpha')){
+							try{
+								item.alpha = Number(item.alpha);
+							}catch(err:Error){
+								item.alpha = 1;
+							}
+						}else{
+							item.alpha = 1;
+						}
+						if(item.hasOwnProperty('thickness')){
+							try{
+								item.thickness = Number(item.thickness);
+							}catch(err:Error){
+								item.thickness = 0;
+							}
+						}else{
+							item.thickness = 0;
+						}
+						return true;
+					}
+					return false;
+				});
+			}
+			if(styles == null || styles.length == 0){
+				styles = [{
+					'step':10,
+					'color':0xeeeeee,
+					'alpha':1,
+					'thickness':0
+				},{
+					'step':50,
+					'color':0xcccccc,
+					'alpha':1,
+					'thickness':0
+				},{
+					'step':100,
+					'color':0xcccccc,
+					'alpha':1,
+					'thickness':2
+				}];
+			}
+			
+			var style:Object = styles[0];
+			
+			var v:int, i:int, isc:Boolean;
+			var step:int;
+			if(styles.length > 1){
+				step = MathHelper.GreatestCommonDivisor(function():Array{
+					var steps:Array = [];
+					for(var i:int = 0; i < styles.length; i++)
+						steps.push((styles[i].step));
+					return steps;
+				});
+			}else{
+				step = style.step;
+			}
+			trace('步进', step);
+			//横线
+			for(v = rect.top + style.step; v < rect.bottom; v++){
+				for(i = styles.length - 1; i >= 0; i--){
+					//trace(v, '%', styles[i].step, '=', v % styles[i].step == 0);
+					if((v % styles[i].step) == 0){
+						//trace('L', v, styles[i].color.toString(16));
+						g.lineStyle(styles[i].thickness, styles[i].color,styles[i].alpha);
+						g.moveTo(rect.left, v);
+						g.lineTo(rect.right, v);
+						break;
+					}
+				}
+			}
+			//g.lineStyle(style.thickness, style.color,style.alpha);
+			for(v = rect.left + style.step; v < rect.right; v++){
+				for(i = styles.length - 1; i >= 0; i--){
+					//trace(v, '%', styles[i].step, '=', v % styles[i].step);
+					if(v % styles[i].step == 0){
+						g.lineStyle(styles[i].thickness, styles[i].color,styles[i].alpha);
+						g.moveTo(v, rect.top);
+						g.lineTo(v, rect.bottom);
+						break;
+					}
+				}
+			}
+			g.endFill();
 		}
 		/**
 		 * 垂直翻转图片

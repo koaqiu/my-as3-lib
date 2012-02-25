@@ -4,6 +4,7 @@
 	import com.adobe.serialization.json.JSON;
 	
 	import flash.display.MovieClip;
+	import flash.system.Capabilities;
 	import flash.ui.ContextMenu;
 
 	/**
@@ -65,12 +66,17 @@
 			}
 		}
 		public function SetValueExt(name:String, v:Object):void {
-			var json:String = JSON.encode(
-				{
-					vauleName:name,
-					data:v
-				}
-			);
+			var d:Object = {
+				'vauleName':name,
+				'data':v
+			};
+			var json:String = '';
+			var player_version:int = int(Capabilities.version.substr(3).split(',')[0]);
+			if(player_version >=11){
+				json = glo.EncodeJson(d);
+			}else{
+				json = com.adobe.serialization.json.JSON.encode(d);
+			}
 			var str:String = "fl.getDocumentDOM().selection[0].parameters[\"CUIV\"].value=\"" + json + "\"";
 			MMExecute(str);
 		}

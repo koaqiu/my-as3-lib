@@ -22,7 +22,12 @@
 		public static  var bal:Object = {
 			IsLocal : true
 		};
-		
+		public static function EncodeJson(o:*):String{
+			return JSON.stringify(o);
+		}
+		public static function DecodeJson(str:String):*{
+			return JSON.parse(str);
+		}
 		/**
 		 * 是否为空 
 		 * @param test
@@ -35,7 +40,6 @@
 		/**
 		 * 根据当前语言跳转
 		 * @param mc
-		 * 
 		 */
 		public static function GotoByLanguage(mc:MovieClip):void{
 			//trace('GotoByLanguage',mc,mc.currentFrame,mc.currentFrameLabel);
@@ -61,7 +65,6 @@
 		/**
 		 * 返回操作系统信息 
 		 * @return 
-		 * 
 		 */
 		public static function get OS():String {
 			return Capabilities.os;
@@ -114,6 +117,18 @@
 					item['dispose']();
 				}catch(err:Error){}
 			}
+		}
+		public static function Extends(base:Object, ext:Object):Object{
+			if(ext != null){
+				for(var k:* in ext){
+					try{
+						base[k] = ext[k];
+					}catch(e:Error){
+						//do nothing
+					}
+				}
+			}
+			return base;
 		}
 		/**
 		* 模拟旧版getURL，自动判断Dir环境
