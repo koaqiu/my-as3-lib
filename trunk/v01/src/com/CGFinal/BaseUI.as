@@ -112,6 +112,7 @@
 		
 		public function BaseUI() {
 			super();
+			throw new Error('请使用新类：xBei.UI.XSprite');
 			this.callLaterMethods = new Dictionary();
 			this.callLater(this.parseQS);
 			this.callLater(this._initDrag);
