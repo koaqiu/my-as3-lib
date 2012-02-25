@@ -8,13 +8,13 @@
 	
 	import xBei.Helper.StringHelper;
 	
-	[Event(name = "open", type = "flash.Events.Event")]
-	[Event(name = "play", type = "flash.Events.Event")]
-	[Event(name = "pause", type = "flash.Events.Event")]
-	[Event(name = "stop", type = "flash.Events.Event")]
+	[Event(name = "open", type = "flash.events.Event")]
+	[Event(name = "play", type = "flash.events.Event")]
+	[Event(name = "pause", type = "flash.events.Event")]
+	[Event(name = "stop", type = "flash.events.Event")]
 	[Event(name = "progress", type = "flash.events.ProgressEvent")]
-	[Event(name = "onPlayComplete", type = "flash.Events.Event")]
-	[Event(name = "volumeChange", type = "flash.Events.Event")]
+	[Event(name = "onPlayComplete", type = "flash.events.Event")]
+	[Event(name = "volumeChange", type = "flash.events.Event")]
 	/**
 	 * Mp3播放内核
 	 * @author KoaQiu

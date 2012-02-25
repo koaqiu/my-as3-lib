@@ -15,6 +15,14 @@ package xBei.Net{
 			this._hasKey = source != null;
 			super(source);
 		}
+		public function Clear():void{
+			for(var k:* in this){
+				if((this[k] is Function) == false){
+					try{delete this[k];}
+					catch(e:Error){}
+				}
+			}
+		}
 		/**
 		 * 添加
 		 * @param key
@@ -108,7 +116,7 @@ package xBei.Net{
 		 * 销毁对象
 		 */
 		public function dispose():void {
-			super.decode('&a=0');
+			this.Clear();
 		}
 	}
 }

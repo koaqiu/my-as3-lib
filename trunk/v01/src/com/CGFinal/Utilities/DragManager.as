@@ -22,6 +22,7 @@
 		}
 	
 		public static function BeginDragIt(disp:DisplayObject):void {
+			throw new Error('请使用新类：xBei.Manager.Dragmanager');
 			if (disp == null || disp.stage == null || disp.parent == null) {
 				//无效的拖曳目标
 				return;

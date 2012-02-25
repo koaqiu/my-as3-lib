@@ -137,13 +137,29 @@ package xBei.Net{
 			return _uv;
 		}
 		
+		/**
+		 * 测试地址是否可以访问
+		 * @param url
+		 * @param callBack function(result:Object):void;result={url,success,error}
+		 */
 		public static function Test(url:String, callBack:Function):void{
 			var isCb:Boolean = false;
+			var uri:Uri = new Uri(url);
 			var http_status:Function = function(e:HTTPStatusEvent):void{
-				//trace(e,url,isCb);
+				//trace(e.status,url,isCb);
 				time.stop();
 				if(isCb)return;isCb = true;
-				if(e.status == 200){
+				if(e.status == 0){
+					if(!uri.IsLocal){
+						callBack({
+							'url':url,
+							'success':false,
+							'error':'timeout'
+						});
+					}else{
+						isCb = false;
+					}
+				}else if(e.status == 200){
 					callBack({
 						'url':url,
 						'success':true
@@ -410,7 +426,7 @@ package xBei.Net{
 			if(path == null)throw new ArgumentError('参数不能会空（null）');
 			var pUri:Uri;
 			if(path is Uri) 
-				path as Uri;
+				pUri = path as Uri;
 			else
 				pUri = new Uri(String(path));
 			if(pUri._validateURI()){

@@ -55,13 +55,13 @@ package xBei.Manager
 }</pre></p>
 		 * 
 		 */
-		public static function Init(stage:Stage,args:Object):void{
-			_stage = stage;
+		public static function Init(args:Object = null):void{
+			_stage = StageManager.Instance.Stage;
 			//初始化.参数
 			var _args:Object = {
 				clickMaskClose:true,
 				closeButton:true,
-				clouseButtonClass:'CloseBt',
+				clouseButtonClass:'',
 				clouseButtonName:'',
 				closeButtonOffX:60,
 				closeButtonOffY:19,
@@ -70,8 +70,6 @@ package xBei.Manager
 				ease:null,
 				noDispose:false,
 				gotoFrame:'',
-				sWidth:_stage.width,
-				sHeight:_stage.height,
 				disableHostKey:false,
 				onHide:null
 			};
@@ -124,8 +122,9 @@ package xBei.Manager
 				(win as MovieClip).gotoAndStop(_curArgs.gotoFrame);
 			}
 			win.scaleX = win.scaleY = .04;
-			var sw:Number = _curArgs.sWidth;// _stage.stageWidth;
-			var sh:Number = _curArgs.sHeight;//_stage.stageHeight;
+			var stage:StageManager = StageManager.Instance;
+			var sw:Number = stage.Width;
+			var sh:Number = stage.Height;
 			win.x = (sw - win.width) / 2;
 			win.y = (sh - win.height) / 2;
 			win.visible = false;

@@ -6,7 +6,7 @@ package xBei.UI {
 	
 	import gs.TweenLite;
 
-	[Event(name="change", type="flash.Events.Event")]
+	[Event(name="change", type="flash.events.Event")]
 	public class CheckBox extends LiteComponent {
 		public static const Version:String = "0.2";
 		private var _cvs:Array = [];

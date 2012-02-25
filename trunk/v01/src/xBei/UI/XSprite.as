@@ -10,6 +10,7 @@ package xBei.UI {
 	import xBei.Events.*;
 	import xBei.Interface.*;
 	import xBei.Manager.*;
+	import xBei.Net.Uri;
 
 	/**
 	 * Enter
@@ -27,9 +28,10 @@ package xBei.UI {
 	 * @see xBei.Interface.IEnabled
 	 */
 	public  class XSprite extends Sprite implements IChildSprite, IDispose, IEnabled {
-		private var _depth:int;
+		private var _depth:int = -1;
 		private var _enable:Boolean = true;
 		
+		public var Tag:Object;
 		/**
 		 * @private
 		 */
@@ -52,6 +54,12 @@ package xBei.UI {
 			this.visible = v > 0;
 			this.alpha = v;
 		}
+		override public function set useHandCursor(value:Boolean):void{
+			super.useHandCursor = value;
+			if(value){
+				this.buttonMode = true;
+			}
+		}
 		/**
 		 * 返回该对象在显示层级中的引索，如果不在显示队列则返回 -1。0 表示对象在最底层
 		 * @return 
@@ -64,6 +72,10 @@ package xBei.UI {
 				return this.parent.getChildIndex(this);
 			}
 		}
+		/**
+		 * 同时设置scaleX、scaleY为同一个值，即按原比例同比缩放，如果原来比例不同将会覆盖
+		 * @param v
+		 */		
 		public function set Scale(v:Number):void{
 			this.scaleX = this.scaleY = v;
 		}
@@ -74,8 +86,12 @@ package xBei.UI {
 		public function get Enabled():Boolean {
 			return this._enable;
 		}
+		/**
+		 * 会覆盖子对象状态，如果有
+		 * @param v
+		 */		
 		public function set Enabled(v:Boolean):void {
-			if(this._enable != v){
+			//if(this._enable != v){
 				this._enable = v;
 				var l:int = super.numChildren;
 				for(var i:int = 0;i < l; i++){
@@ -87,7 +103,7 @@ package xBei.UI {
 						catch(e:Error){}
 					}
 				}
-			}
+			//}
 		}
 		/**
 		 * 级层深度（模拟AS2）
@@ -99,6 +115,10 @@ package xBei.UI {
 		}
 		public function set VDepth(v:int):void {
 			this._depth = v;
+		}
+		
+		public function get Url():Uri{
+			return new Uri(this.loaderInfo.loaderURL);
 		}
 		/**
 		 * @inheritDoc
@@ -138,6 +158,24 @@ package xBei.UI {
 			if(this.parent != null){
 				this.parent.removeChild(this);
 			}
+		}
+		/**
+		 * 添加并设置属性
+		 * @param child
+		 * @param initData
+		 * @return 
+		 */		
+		public function AddChild(child:DisplayObject, initData:Object = null):DisplayObject{
+			if(child == null)throw new ArgumentError('child不能为空（null）');
+			this.addChild(child);
+			for(var k:* in initData){
+				if(initData[k] is Function){
+					initData[k](child);
+				}else if(child.hasOwnProperty(k)){
+					child[k] = initData[k];
+				}
+			}
+			return child;
 		}
 		
 		/**
@@ -457,12 +495,15 @@ package xBei.UI {
 		 * 修改对象的颜色 
 		 * @param disp
 		 * @param color
-		 * 
 		 */
-		public static function ChangeColor(disp:DisplayObject,color:uint):void{
-			var ct:ColorTransform = disp.transform.colorTransform;
-			ct.color = color;
-			disp.transform.colorTransform = ct;
+		public static function ChangeColor(disp:DisplayObject, color:int):void{
+			if(color == -1){
+				disp.transform.colorTransform = new ColorTransform();
+			}else{
+				var ct:ColorTransform = disp.transform.colorTransform;
+				ct.color = color;
+				disp.transform.colorTransform = ct;
+			}
 		}
 		/**
 		 * 隐藏
@@ -476,6 +517,7 @@ package xBei.UI {
 		 */
 		public static function HideItByAni(disp:DisplayObject,aniMode:int = 0, duration:Number = .3, 
 										   callBack:Function = null, thisObject:* = null):DisplayObject{
+			TweenLite.killTweensOf(disp);
 			if(duration > 10){
 				duration /= 1000;
 			}
@@ -513,11 +555,12 @@ package xBei.UI {
 		 * @retrun
 		 * @see xBei.AnimationMode
 		 */
-		public static function ShowItByAni(disp:DisplayObject,aniMode:int = 0, duration:Number = .3, 
+		public static function ShowItByAni(disp:DisplayObject, aniMode:int = 0, duration:Number = .3, 
 										   callBack:Function = null, thisObject:* = null):DisplayObject{
 			if(duration > 10){
 				duration /= 1000;
 			}
+			TweenLite.killTweensOf(disp);
 			if(aniMode == AnimationMode.DIRECT){
 				disp.visible = true;
 				if(disp.alpha == 0){
@@ -556,5 +599,16 @@ package xBei.UI {
 			}
 			return disp;
 		}//end function
+		public static function GetSafeBounds(target:DisplayObject, targetCoordinateSpace:DisplayObject):Rectangle {
+			if(target == null){
+				throw new ArgumentError('target 不能为空（null）');
+			}else if(targetCoordinateSpace == null){
+				throw new ArgumentError('targetCoordinateSpace 不能为空（null）');
+			}
+			if(target.width == 0 || target.height == 0)
+				return new Rectangle();
+			
+			return target.getBounds(targetCoordinateSpace);
+		}
 	}
 }

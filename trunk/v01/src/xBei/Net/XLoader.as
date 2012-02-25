@@ -10,6 +10,7 @@ package xBei.Net {
 	import flash.utils.setTimeout;
 	
 	import xBei.Helper.StringHelper;
+	import xBei.Interface.IDispose;
 	import xBei.Net.Events.DataLoaderEvent;
 
 	/**
@@ -28,7 +29,7 @@ package xBei.Net {
 	 * 发生错误，包括IO错误和安全（Security）错误 
 	 */
 	[Event(name = "error", type = "xBei.Net.Events.DataLoaderEvent")]
-	public class XLoader extends Loader {
+	public class XLoader extends Loader implements IDispose {
 		private var _timeOut:int = 30;
 		
 		/**
@@ -65,7 +66,12 @@ package xBei.Net {
 		private var _lastRq:URLRequest;
 		private var _dataLoadCompleted:Boolean;
 		private var _begingDataLoad:Boolean;
-		
+
+		public function get IsLocal():Boolean{
+			var uri:Uri = new Uri(this._lastRq.url);
+			return uri.IsLocal;
+		}
+
 		public function XLoader() {
 			super();
 			this.contentLoaderInfo.addEventListener(Event.INIT, DPE_Init);
@@ -78,6 +84,26 @@ package xBei.Net {
 			
 			this._timer = new Timer(this._timeOut * 1000);
 		}
+		
+		public function dispose():void{
+			this._timer.removeEventListener(TimerEvent.TIMER, DPE_TimeOut);
+			this._timer.stop();
+			this._timer = null;
+			this.RequestData = null;
+			this._callBack = null;
+				
+			this.contentLoaderInfo.removeEventListener(Event.INIT, DPE_Init);
+			this.contentLoaderInfo.removeEventListener(ProgressEvent.PROGRESS, DPE_Progress);
+			this.contentLoaderInfo.removeEventListener(Event.OPEN, DPE_BeginTransfer);
+			this.contentLoaderInfo.removeEventListener(Event.COMPLETE, DPE_DataLoaded);
+			this.contentLoaderInfo.removeEventListener(HTTPStatusEvent.HTTP_STATUS, DPE_HttpStatusChanged);
+			this.contentLoaderInfo.removeEventListener(IOErrorEvent.IO_ERROR, DPE_IOError);
+			this.contentLoaderInfo.removeEventListener(SecurityErrorEvent.SECURITY_ERROR, DPE_SecurityError);
+			
+			this.unloadAndStop();
+		}
+		
+		
 		/**
 		 * 请使用新的方法：Load(); 
 		 * @private
@@ -207,7 +233,7 @@ package xBei.Net {
 		 * 加载超时 
 		 */
 		protected function OnTimeOut():void {
-			trace("time out",this._lastRq,this._lastRq.url);
+			trace("time out",this._lastRq, this._lastRq.url);
 			this._timer.removeEventListener(TimerEvent.TIMER, DPE_TimeOut);
 			this._timer.stop();
 			try{this.Close();}catch(error:Error){}
@@ -243,24 +269,31 @@ package xBei.Net {
 			}
 		}
 		private function DPE_HttpStatusChanged(e:HTTPStatusEvent):void {
+			//trace(e.status);
 			if (Capabilities.playerType == "DirectorXtra") {
 				var t:Timer = new Timer(100);
 				t.addEventListener(TimerEvent.TIMER, DPE_DIR_Loaded);
 				t.start();
 			}else if (e.status == 0) {
-				this.OnTimeOut();
+				if(this.IsLocal){
+					//this.OnError('IOError');
+				}else{
+					this.OnTimeOut();
+				}
 			}else if(e.status != 200){
 				this.OnError(StringHelper.Format('服务器错误：{0}',e.status));
 			}
 		}
 		private function DPE_BeginTransfer(e:Event):void {
 			//trace("DPE_BeginTransfer",this._lastRq.url, JSON.encode(this._lastRq.data));
+			//trace('开始下载');
 			this._dataLoadCompleted = false;
 			this._begingDataLoad = false;
 			this._stopTimeoutCheck();
 		}
 		
 		private function DPE_IOError(e:IOErrorEvent):void {
+			//trace(e);
 			if(this._begingDataLoad == false){
 				this.OnError('IOError' + e.text);
 			}

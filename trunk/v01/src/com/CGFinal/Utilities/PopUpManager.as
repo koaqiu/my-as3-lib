@@ -31,6 +31,7 @@
 			_stage = null;
 		}
 		public static function Show(dis:DisplayObject, target:DisplayObject, onHide:Function = null):PopUpManager {
+			throw new Error('请使用新类：xBei.Manager.PopupManager');
 			//if(_ppm != null){
 			//	_ppm.dispose();
 			//} 

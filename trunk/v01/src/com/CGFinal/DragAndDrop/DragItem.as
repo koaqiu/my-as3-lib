@@ -28,6 +28,7 @@
 			this._targetItem = disp;
 			this._funDD = funDD;
 			super();
+			throw new Error('请使用新类：xBei.UI.DragItem');
 			var g:Graphics = this.graphics;
 			g.beginBitmapFill(ImageHelper.GetBitmap(disp));
 			g.drawRect(0, 0, disp.width, disp.height);

@@ -1,7 +1,5 @@
-package com.CGFinal.Controls {
-	import com.CGFinal.BaseUI;
-	import com.CGFinal.LiteComponent;
-	
+package xBei.UI
+{
 	import flash.events.Event;
 	import flash.events.TextEvent;
 	import flash.text.StyleSheet;
@@ -10,41 +8,37 @@ package com.CGFinal.Controls {
 	
 	import xBei.Helper.StringHelper;
 	
-	/**
-	 * ...
-	 * @author ...
-	 */
-	public class LinkSplitPage extends BaseUI {
-
+	public class LinkSplitPager extends XSprite{
 		private var _txt:TextField;
-
+		private var _tf:TextFormat;
+		
 		private var _format:String = '<a href="[FIRST]">首页</a> <a href="[PRE]">上一页</a> [PAGELIST] <a href="[NEXT]">下一页</a> <a href="[LAST]">尾页</a>';
 		public function set Format(v:String):void{
 			_format = v;
 		}
 		private var _recordCount:uint = 0;
-
+		
 		/**
 		 * 总记录数
 		 */
 		public function get RecordCount():uint {
 			return _recordCount;
 		}
-
+		
 		public function set RecordCount(v:uint):void {
 			_recordCount = v;
 			_pageCount = 0;
 		}
-
+		
 		private var _pageSize:uint = 10;
-
+		
 		/**
 		 * 分页大小
 		 */
 		public function get PageSize():uint {
 			return _pageSize;
 		}
-
+		
 		public function set PageSize(v:uint):void {
 			if (v < 0) {
 				_pageSize = 1;
@@ -52,21 +46,21 @@ package com.CGFinal.Controls {
 			_pageSize = v;
 			_pageCount = 0;
 		}
-
+		
 		private var _oldPageIndex:uint = 1;
-
+		
 		public function get OldPageIndex():uint {
 			return _oldPageIndex;
 		}
 		private var _pageIndex:uint = 1;
-
+		
 		/**
 		 * 当前页码
 		 */
 		public function get PageIndex():uint {
 			return _pageIndex;
 		}
-
+		
 		public function set PageIndex(v:uint):void {
 			if (v == _pageIndex) {
 				return;
@@ -82,11 +76,11 @@ package com.CGFinal.Controls {
 			if (_pageIndex < 1) {
 				_pageIndex = 1;
 			}
-
+			
 		}
-
+		
 		private var _pageCount:uint = 0;
-
+		
 		/**
 		 * 页码总数（只读）
 		 */
@@ -99,15 +93,14 @@ package com.CGFinal.Controls {
 			}
 			return _pageCount;
 		}
-
-		public function LinkSplitPage() {
-			throw new Error('请使用新类：xBei.UI.LinkSplitePager');
+		
+		public function LinkSplitPager() {
+			super();
 		}
-
-		private var _tf:TextFormat;
+		
 		override protected function createChildren():void {
 			super.createChildren();
-			_txt = super.createLabel('');
+			_txt = this.createLabel('');
 			_tf = _txt.getTextFormat();
 			_tf.bold = true;
 			_tf.font = 'Arial';
@@ -119,7 +112,18 @@ package com.CGFinal.Controls {
 			this._txt.styleSheet = css;
 			addChild(_txt);
 		}
-
+		/**
+		 * 创建一个标签（Label）
+		 * @param	text
+		 * @return
+		 */
+		protected function createLabel(text:String):TextField {
+			var lab:TextField = new TextField();
+			lab.selectable = false;
+			lab.autoSize = "left";
+			lab.text = text;
+			return lab;
+		}
 		public function RenderPager():void {
 			if (this.RecordCount == 0 || this.PageCount == 0) {
 				this._txt.text = '没有任何记录';
@@ -127,7 +131,7 @@ package com.CGFinal.Controls {
 			}
 			var si:int = this.PageIndex - 5;
 			var ei:int = this.PageIndex + 4;
-
+			
 			if (ei > this.PageCount) {
 				si -= ei - this.PageCount;
 				ei = this.PageCount;
@@ -140,7 +144,7 @@ package com.CGFinal.Controls {
 				}
 				si = 1;
 			}
-
+			
 			var pagelist:String = '';
 			if(this.PageIndex > 6){
 				pagelist += '<a href="event:gotoPage:1">1</a>...';
@@ -167,7 +171,7 @@ package com.CGFinal.Controls {
 			this._txt.htmlText = html;
 			//this._txt.setTextFormat(_tf);
 		}
-
+		
 		//Do Events
 		protected function OnPageIndexChanged(newIndex:int):void {
 			if(this.PageIndex != newIndex){
@@ -177,7 +181,7 @@ package com.CGFinal.Controls {
 				this.dispatchEvent(new Event(Event.CHANGE));
 			}
 		}
-
+		
 		//Events
 		private function DPE_ChangePageIndex(e:TextEvent):void {
 			//trace(e.text);
@@ -189,5 +193,4 @@ package com.CGFinal.Controls {
 			}
 		}
 	}
-
 }

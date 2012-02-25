@@ -1,10 +1,11 @@
 package xBei.Net{
-	import com.adobe.serialization.json.JSON;
-	
 	import flash.events.*;
 	import flash.net.*;
 	import flash.system.Capabilities;
+	import flash.utils.ByteArray;
 	import flash.utils.Timer;
+	
+	import net.hires.debug.Logger;
 	
 	import xBei.Helper.StringHelper;
 	import xBei.Net.Events.DataLoaderEvent;
@@ -31,6 +32,172 @@ package xBei.Net{
 	 * @see xBei.Net.Events.DataLoaderEvent
 	 */
 	public class DataLoader extends URLLoader{
+		private static var _boundary:String = "";
+		
+		protected static const HTTP_SEPARATOR:String="\r\n";
+		private static var MIME_Type:Object = {
+			'.ai':'application/postscript',
+			'.aif':'audio/x-aiff',
+			'.aifc':'audio/x-aiff',
+			'.aiff':'audio/x-aiff',
+			'.asc':'text/plain',
+			'.au':'audio/basic',
+			'.avi':'video/x-msvideo',
+			'.bcpio':'application/x-bcpio',
+			'.bin':'application/octet-stream',
+			'.c':'text/plain',
+			'.cc':'text/plain',
+			'.ccad':'application/clariscad',
+			'.cdf':'application/x-netcdf',
+			'.class':'application/octet-stream',
+			'.cpio':'application/x-cpio',
+			'.cpt':'application/mac-compactpro',
+			'.csh':'application/x-csh',
+			'.css':'text/css',
+			'.dcr':'application/x-director',
+			'.dir':'application/x-director',
+			'.dms':'application/octet-stream',
+			'.doc':'application/msword',
+			'.drw':'application/drafting',
+			'.dvi':'application/x-dvi',
+			'.dwg':'application/acad',
+			'.dxf':'application/dxf',
+			'.dxr':'application/x-director',
+			'.eps':'application/postscript',
+			'.etx':'text/x-setext',
+			'.exe':'application/octet-stream',
+			'.ez':'application/andrew-inset',
+			'.f':'text/plain',
+			'.f90':'text/plain',
+			'.fli':'video/x-fli',
+			'.gif':'image/gif',
+			'.gtar':'application/x-gtar',
+			'.gz':'application/x-gzip',
+			'.h':'text/plain',
+			'.hdf':'application/x-hdf',
+			'.hh':'text/plain',
+			'.hqx':'application/mac-binhex40',
+			'.htm':'text/html',
+			'.html':'text/html',
+			'.ice':'x-conference/x-cooltalk',
+			'.ief':'image/ief',
+			'.iges':'model/iges',
+			'.igs':'model/iges',
+			'.ips':'application/x-ipscript',
+			'.ipx':'application/x-ipix',
+			'.jpe':'image/jpeg',
+			'.jpeg':'image/jpeg',
+			'.jpg':'image/jpeg',
+			'.js':'application/x-javascript',
+			'.kar':'audio/midi',
+			'.latex':'application/x-latex',
+			'.lha':'application/octet-stream',
+			'.lsp':'application/x-lisp',
+			'.lzh':'application/octet-stream',
+			'.m':'text/plain',
+			'.man':'application/x-troff-man',
+			'.me':'application/x-troff-me',
+			'.mesh':'model/mesh',
+			'.mid':'audio/midi',
+			'.midi':'audio/midi',
+			'.mif':'application/vnd.mif',
+			'.mime':'www/mime',
+			'.mov':'video/quicktime',
+			'.movie':'video/x-sgi-movie',
+			'.mp2':'audio/mpeg',
+			'.mp3':'audio/mpeg',
+			'.mpe':'video/mpeg',
+			'.mpeg':'video/mpeg',
+			'.mpg':'video/mpeg',
+			'.mpga':'audio/mpeg',
+			'.ms':'application/x-troff-ms',
+			'.msh':'model/mesh',
+			'.nc':'application/x-netcdf',
+			'.oda':'application/oda',
+			'.pbm':'image/x-portable-bitmap',
+			'.pdb':'chemical/x-pdb',
+			'.pdf':'application/pdf',
+			'.pgm':'image/x-portable-graymap',
+			'.pgn':'application/x-chess-pgn',
+			'.png':'image/png',
+			'.pnm':'image/x-portable-anymap',
+			'.pot':'application/mspowerpoint',
+			'.ppm':'image/x-portable-pixmap',
+			'.pps':'application/mspowerpoint',
+			'.ppt':'application/mspowerpoint',
+			'.ppz':'application/mspowerpoint',
+			'.pre':'application/x-freelance',
+			'.prt':'application/pro_eng',
+			'.ps':'application/postscript',
+			'.qt':'video/quicktime',
+			'.ra':'audio/x-realaudio',
+			'.ram':'audio/x-pn-realaudio',
+			'.ras':'image/cmu-raster',
+			'.rgb':'image/x-rgb',
+			'.rm':'audio/x-pn-realaudio',
+			'.roff':'application/x-troff',
+			'.rpm':'audio/x-pn-realaudio-plugin',
+			'.rtf':'text/rtf',
+			'.rtx':'text/richtext',
+			'.scm':'application/x-lotusscreencam',
+			'.set':'application/set',
+			'.sgm':'text/sgml',
+			'.sgml':'text/sgml',
+			'.sh':'application/x-sh',
+			'.shar':'application/x-shar',
+			'.silo':'model/mesh',
+			'.sit':'application/x-stuffit',
+			'.skd':'application/x-koan',
+			'.skm':'application/x-koan',
+			'.skp':'application/x-koan',
+			'.skt':'application/x-koan',
+			'.smi':'application/smil',
+			'.smil':'application/smil',
+			'.snd':'audio/basic',
+			'.sol':'application/solids',
+			'.spl':'application/x-futuresplash',
+			'.src':'application/x-wais-source',
+			'.step':'application/STEP',
+			'.stl':'application/SLA',
+			'.stp':'application/STEP',
+			'.sv4cpio':'application/x-sv4cpio',
+			'.sv4crc':'application/x-sv4crc',
+			'.swf':'application/x-shockwave-flash',
+			'.t':'application/x-troff',
+			'.tar':'application/x-tar',
+			'.tcl':'application/x-tcl',
+			'.tex':'application/x-tex',
+			'.texi':'application/x-texinfo',
+			'.texinfo':'application/x-texinfo',
+			'.tif':'image/tiff',
+			'.tiff':'image/tiff',
+			'.tr':'application/x-troff',
+			'.tsi':'audio/TSP-audio',
+			'.tsp':'application/dsptype',
+			'.tsv':'text/tab-separated-values',
+			'.txt':'text/plain',
+			'.unv':'application/i-deas',
+			'.ustar':'application/x-ustar',
+			'.vcd':'application/x-cdlink',
+			'.vda':'application/vda',
+			'.viv':'video/vnd.vivo',
+			'.vivo':'video/vnd.vivo',
+			'.vrml':'model/vrml',
+			'.wav':'audio/x-wav',
+			'.wrl':'model/vrml',
+			'.xbm':'image/x-xbitmap',
+			'.xlc':'application/vnd.ms-excel',
+			'.xll':'application/vnd.ms-excel',
+			'.xlm':'application/vnd.ms-excel',
+			'.xls':'application/vnd.ms-excel',
+			'.xlw':'application/vnd.ms-excel',
+			'.xml':'text/xml',
+			'.xpm':'image/x-xpixmap',
+			'.xwd':'image/x-xwindowdump',
+			'.xyz':'chemical/x-pdb',
+			'.zip':'application/zip'
+		}
+		
 		private var _timeOut:int = 30;
 
 		/**
@@ -47,6 +214,10 @@ package xBei.Net{
 			if(value > 0){
 				_timeOut = value;
 			}
+		}
+		public function get IsLocal():Boolean{
+			var uri:Uri = new Uri(this._lastRq.url);
+			return uri.IsLocal;
 		}
 		private var _isDebug:Boolean = false;
 		/**
@@ -142,7 +313,7 @@ package xBei.Net{
 		 * @param	callBack	回调函数 function(data:*, loader:DataLoader):Boolean;
 		 */	
 		public function Load(pUrl:*, timeOut:int = 0, callBack:Function = null):void {
-			trace('DataLoader.Load');
+			//trace('DataLoader.Load');
 			if(this._checkUrl(pUrl)){
 				_mode = 0;
 				this._initTimer(timeOut);
@@ -156,15 +327,39 @@ package xBei.Net{
 		 * 用POST方法提交数据
 		 * @param url
 		 * @param callBack
-		 * 
 		 */		
 		public function Post(url:String, callBack:Function = null):void{
-			trace('DataLoader.Post:',url);
+			//trace('DataLoader.Post:',url);
 			var rq:URLRequest = new URLRequest(url);
 			rq.method = URLRequestMethod.POST;
 			rq.data = this.prepareRequest();
+			super.dataFormat = URLLoaderDataFormat.TEXT;
+			this.Load(rq, 30, callBack);
+		}
+		public function MyPost(url:String, data:Object, headers:Array = null, callBack:Function = null):void{
+			var rq:URLRequest = new URLRequest(url);
+			rq.method = URLRequestMethod.POST;
+			this.setHeader(rq, new URLRequestHeader("Cache-Control", "no-cache"));
+			this.setHeader(rq, new URLRequestHeader("Content-Type", "multipart/form-data; boundary=" + getBoundary()));
 			
-			super.dataFormat = dataFormat;
+			rq.data = this.getMultipart(data);
+			if(headers != null && headers.length > 0){
+				for(var i:int = 0; i < headers.length; i++){
+					var header:Object = headers[i];
+					this.setHeader(rq, new URLRequestHeader(header.key, header.value));
+				}
+			}
+			super.dataFormat = URLLoaderDataFormat.TEXT;
+			this.Load(rq, 30, callBack);
+		}
+		private function setHeader(rq:URLRequest, header:URLRequestHeader):void	{
+			rq.requestHeaders.push(header);
+		}
+		public function GetImage(url:String, callBack:Function = null):void{
+			var rq:URLRequest = new URLRequest(url);
+			rq.method = URLRequestMethod.POST;
+			rq.data = this.prepareRequest();
+			super.dataFormat = URLLoaderDataFormat.BINARY;
 			this.Load(rq, 30, callBack);
 		}
 		/**
@@ -173,7 +368,6 @@ package xBei.Net{
 		 * @param Url			目的地址
 		 * @param timeOut		超时，0  表示使用默认值（30秒）
 		 * @param callBack
-		 * 
 		 */
 		public function UploadFile(fileToUpload:FileReference,pUrl:*, timeOut:int = 0,callBack:Function = null):void {
 			if(fileToUpload !=null && this._checkUrl(pUrl)){
@@ -259,7 +453,7 @@ package xBei.Net{
 			return qs;
 		}
 		protected function runCallBackFunc(resultData:*):void{
-			trace('DataLoader.runCallBackFunc');
+			//trace('DataLoader.runCallBackFunc');
 			if (this._callBack != null) {
 				var cb:Function = this._callBack;
 				this._callBack = null;
@@ -268,10 +462,75 @@ package xBei.Net{
 				}catch(error:ArgumentError){
 					this.OnError('CallBack错误，正确的回调函数结构为：function(data:*,loader:*):Boolan{}');
 				}
-				trace('call back 执行完毕');
+				//trace('call back 执行完毕');
 			}else{
 				//trace('DataLoader.OnDataLoaded callback is null');
 			}
+		}
+		private function getMultipart(dataToSend:Object):ByteArray{
+			var body:ByteArray = new ByteArray;
+			var key:String;
+			for (key in dataToSend)	{
+				var tData:Object = dataToSend[key];
+				if (tData is PostFileItem){
+					var pfi:PostFileItem = tData as PostFileItem;
+					if(pfi.Data != null){
+						if(StringHelper.IsNullOrEmpty(pfi.FileName)){
+							pfi.FileName = 'unknowFile';
+						}
+						if(StringHelper.IsNullOrEmpty(pfi.Field)){
+							pfi.Field = 'FileData';
+						}
+						body.writeUTFBytes("--" + getBoundary());
+						body.writeUTFBytes(HTTP_SEPARATOR);
+						body.writeUTFBytes("Content-Disposition: form-data; name=\"" + pfi.Field + "\"; filename=\"" + pfi.FileName + "\"");
+						body.writeUTFBytes(HTTP_SEPARATOR);
+						//body.writeUTFBytes("application/octet-stream");//Content-Type: application/octet-stream
+						body.writeUTFBytes("Content-Type: " + this.getContentType(pfi.FileName));
+						body.writeUTFBytes(HTTP_SEPARATOR);
+						body.writeUTFBytes(HTTP_SEPARATOR);
+						body.writeBytes(pfi.Data, 0, pfi.Data.length);
+						body.writeUTFBytes(HTTP_SEPARATOR);
+					}
+				}else if (tData is String || tData is Boolean || tData is Number || tData is int || tData is uint || tData is Date)	{
+					body.writeUTFBytes("--" + getBoundary());
+					body.writeUTFBytes(HTTP_SEPARATOR);
+					body.writeUTFBytes("Content-Disposition: form-data; name=\"" + key + "\"");
+					body.writeUTFBytes(HTTP_SEPARATOR);
+					body.writeUTFBytes(HTTP_SEPARATOR);
+					body.writeUTFBytes(tData.toString());
+					body.writeUTFBytes(HTTP_SEPARATOR);
+				}
+			}
+			
+			body.writeUTFBytes("--" + getBoundary() + "--");
+			body.writeUTFBytes(HTTP_SEPARATOR);
+			
+			return body;
+		}
+		private function getContentType(file:String):String{
+			if(file != null && file.length >1){
+				var i:int = file.lastIndexOf('.');
+				if(i >= 0 && i < file.length - 1){
+					var ext:String = file.substr(i);
+					if(MIME_Type[ext] != null){
+						return MIME_Type[ext];
+					}
+				}
+			}
+			return 'application/octet-stream';
+		}
+		private static function getBoundary():String	{
+			var int32:int;
+			if (_boundary.length == 0) {
+				int32 = 0;
+				while (int32 < 32) {
+					_boundary = _boundary + String.fromCharCode(int(97 + Math.random() * 25));
+					int32++;
+				}
+				_boundary = _boundary;
+			}
+			return _boundary;
 		}
 		//Do Event
 		/**
@@ -282,7 +541,7 @@ package xBei.Net{
 			this._timer.removeEventListener(TimerEvent.TIMER, DPE_TimeOut);
 			this._timer.stop();
 			this.dispatchEvent(new DataLoaderEvent(DataLoaderEvent.DATA_LOADED));
-			trace('DataLoader.OnDataLoaded');
+			//trace('DataLoader.OnDataLoaded');
 			this.runCallBackFunc({
 				'success':true,
 				'resultData':this.data
@@ -294,7 +553,8 @@ package xBei.Net{
 		 */
 		protected function OnError(msg:String):void {
 			_errMessage = msg;
-			trace('加载', this._lastRq.url,'时发生错误：', msg);
+			//trace('加载', this._lastRq == null ?'null':this._lastRq.url,'时发生错误：', msg);
+			Logger.error(StringHelper.Format('加载错误：{0}', msg));
 			this._timer.removeEventListener(TimerEvent.TIMER, DPE_TimeOut);
 			this._timer.stop();
 			this.dispatchEvent(new DataLoaderEvent(DataLoaderEvent.ERROR));
@@ -309,7 +569,7 @@ package xBei.Net{
 		 * 加载超时 
 		 */
 		protected function OnTimeOut():void {
-			trace("time out",this._lastRq.url);
+			//trace("time out",this._lastRq.url);
 			this._timer.removeEventListener(TimerEvent.TIMER, DPE_TimeOut);
 			this._timer.stop();
 			//try{this.Close();}catch(error:Error){}
@@ -340,7 +600,6 @@ package xBei.Net{
 			}
 		}
 		private function DPE_BeginTransfer(e:Event):void {
-			trace("DPE_BeginTransfer",this._lastRq.url, JSON.encode(this._lastRq.data));
 			this._timer.removeEventListener(TimerEvent.TIMER, DPE_TimeOut);
 			this._timer.stop();
 		}
@@ -374,14 +633,20 @@ package xBei.Net{
 			this.OnTimeOut();
 		}
 		private function DPE_HttpStatusChanged(e:HTTPStatusEvent):void {
-			trace("HTTPStatus:",e.status, this.RequestUrl.url);
+			//trace("HTTPStatus:",e.status, this.RequestUrl.url);
+			Logger.log(StringHelper.Format("HTTPStatus:{0},{1}",e.status, this.RequestUrl.url));
 			if (Capabilities.playerType == "DirectorXtra") {
 				var t:Timer = new Timer(100);
 				t.addEventListener(TimerEvent.TIMER, DPE_DIR_Loaded);
 				t.start();
 			}else if (e.status == 0) {
-				this.OnTimeOut();
+				if(this.IsLocal){
+					//this.OnError('IOError');
+				}else{
+					this.OnTimeOut();
+				}
 			}else if(e.status != 200){
+				Logger.error('404错误 ' + this.RequestUrl.url);
 				this.OnError(StringHelper.Format('服务器错误：{0}',e.status));
 			}
 		}
@@ -392,6 +657,7 @@ package xBei.Net{
 			this.OnDataLoaded();
 		}
 		private function DPE_ProgressChanged(e:ProgressEvent):void {
+			//trace('进度条：',e.bytesLoaded);
 			this.dispatchEvent(e);
 		}
 	}

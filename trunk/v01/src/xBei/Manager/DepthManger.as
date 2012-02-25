@@ -38,7 +38,13 @@ package xBei.Manager {
 				return;
 			}else {
 				for (var i:int = 0; i < l; i++ ) {
-					var itemDp:int = doc.getChildAt(i)["VDepth"];
+					var dp:DisplayObject = doc.getChildAt(i);
+					var itemDp:int;
+					if(dp.hasOwnProperty('VDepth')){
+						itemDp = dp["VDepth"];
+					}else{
+						itemDp = i;
+					}
 					//if(depth>100)trace(child,doc.getChildAt(i).name+".depth="+itemDp+",toDepth="+depth,itemDp > depth);
 					if (itemDp == depth) {
 						//有对象，覆盖之

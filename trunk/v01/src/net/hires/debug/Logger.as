@@ -43,6 +43,7 @@ package net.hires.debug {
 		public static var LEVEL_SILENT:int = 4;
 
 		private static var level_names:Array = ["INFO", "DEBUG", "WARNING", "ERROR", "SILENT"];
+		private static var level_colors:Array = [0xffffff, 0xff00ff, 0xffff00, 0xff0000, 0xeeeeee];
 		private static var stack:Array = [[],[]];
 
 		private static var monitors:Array = [];
@@ -125,10 +126,12 @@ package net.hires.debug {
 		public function log( msg : *, level : int = 0 ):void {
 			if (level < level)
 				return;
-
+			var beginIndex:int = textBox.length;
+			var tf:TextFormat = new TextFormat("_sans", 10, level_colors[level]);
 			textBox.appendText(getTimestamp() + " :: " + level_names[level] + " :: " + String(msg) + "\n");
+			textBox.setTextFormat(tf,beginIndex,textBox.length - 1);
 			textBox.autoSize = "left";
-			bgBox.width = textBox.width;
+			bgBox.width = textBox.width + 10;
 			textBox.autoSize = 'none';
 
 			textBox.height = 40;
@@ -139,7 +142,7 @@ package net.hires.debug {
 		}
 
 		public function clear():void {
-			textBox.text = getTimestamp() + " :: Hi-ReS! Logger > " + level_names[level] + " mode.";
+			textBox.text = getTimestamp() + " :: Hi-ReS! Logger > " + level_names[level] + " mode.\n";
 			//textBox.autoSize = "left";
 
 			bgBox.width = textBox.width;

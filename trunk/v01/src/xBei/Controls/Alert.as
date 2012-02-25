@@ -1,19 +1,20 @@
 ﻿package xBei.Controls {
-	import com.CGFinal.BaseUI;
-	
 	import flash.display.*;
 	import flash.events.Event;
-	import flash.filters.DropShadowFilter;
+	import flash.geom.Point;
 	import flash.system.Capabilities;
 	import flash.text.*;
 	
 	import gs.TweenLite;
 	
+	import xBei.Manager.StageManager;
+	import xBei.UI.XSprite;
+	
 	/**
 	 * 在顶部显示一个提示信息，多个信息同时显示时会从上到下依次排列
 	 * @author KoaQiu
 	 */
-	public class Alert extends BaseUI {
+	public class Alert extends XSprite {
 		public const Version:String = "0.12";
 		//属性
 		private var _bgColor:uint = 0xffffff;
@@ -81,7 +82,7 @@
 		private var sheight:Number = 400;
 		//private var index = 1;
 		private var lasty:int = 50;
-		private var c:int = 0;
+		private var _vCount:int = 0;
 
 		private static var _ins:Alert = null;
 		public function Alert() {
@@ -101,23 +102,23 @@
 			if(e){
 				this.removeEventListener(Event.ADDED_TO_STAGE, onAddedToStage);
 			}
-			//this.swidth = stage.stageWidth;
-			//this.sheight = stage.stageHeight;
+			this.swidth = StageManager.Instance.StageWidth;
+			this.sheight = StageManager.Instance.StageHeight;
 		}
 		/**
 		 * 初始化组件
 		 * @param	stage
 		 * @param	config
 		 */
-		public static function Init(stage:Stage, config:Object = null):void {
+		public static function Init(config:Object = null):void {
 			if(Alert._ins==null){
 				Alert._ins = new Alert();
-				stage.addChild(Alert._ins);
+				StageManager.Instance.Stage.addChild(Alert._ins);
 			}
-			Alert._ins.swidth = stage.stageWidth;
-			if (config) {
+			//Alert._ins.swidth = stage.stageWidth;
+			if (config != null) {
 				for (var k:Object in config) {
-					if (Alert._ins[k]) {
+					if (Alert._ins.hasOwnProperty(k)) {
 						Alert._ins[k] = config[k];
 					}
 				}
@@ -142,7 +143,7 @@
 		internal function _show(text:String):void{
 			var mc:Sprite = new Sprite();
 			
-			stage.addChild(mc);
+			this.stage.addChild(mc);
 			var _txt:TextField = new TextField();
 			mc.addChild(_txt);
 			_txt.multiline = true;
@@ -175,39 +176,39 @@
 			g.drawRoundRect(0, 0, bg_width, bg_height, 5);
 			g.endFill();
 			 
-			//mc.filters = [new DropShadowFilter(4,45,0,.8)];
 			mc.alpha = 0;
-			if (stage.align == "") {
-				mc.x = (swidth - mc.width) / 2;
-			}else{
-				mc.x = (stage.stageWidth - mc.width) / 2;
-			}
-			mc.y = -mc.height - 10;
-			if(c==0){
-				lasty=50;
-			}
-			var toy:Number=lasty;
-			if(toy>sheight){
+			var stage:StageManager = StageManager.Instance;
+			var p:Point = stage.GetPosition(mc, 0x13);
+			mc.x = p.x;//(stage.Width - mc.width) / 2;
+			mc.y = p.y - mc.height - 10;
+			if(_vCount == 0){
 				lasty = 50;
+			}
+			var toy:Number = lasty;
+			if(toy > sheight){
+				lasty = sheight- mc.height;
 			}
 			//TODO 不滚动！
 			//lasty += mc.height - 10;
-			c++;
+			_vCount++;
 			TweenLite.to(mc, anitime, {
 				y:toy,
 				autoAlpha:Alpha,
 				//delay:(c-1)*.2,
-				onComplete:function():void{
-					TweenLite.to(mc, anitime, {
-						autoAlpha:0,
-						delay:waittime,
-						onComplete:function():void{
-							mc.parent.removeChild(mc);
-							c--;
-					}});
-			}});
+				'onCompleteParams':[mc],
+				'onComplete':this._hide
+			});
 		}//end function
-		
+		private function _hide(mc:Sprite):void{
+			TweenLite.to(mc, anitime, {
+				autoAlpha:0,
+				delay:waittime,
+				onComplete:function():void{
+					mc.parent.removeChild(mc);
+					_vCount--;
+				}
+			});
+		}
 		private function zy(str:String):String {
 			str = str.replace("\\n", "\n").replace("\\r", "\r").replace("\\t", "\t");
 			return str;

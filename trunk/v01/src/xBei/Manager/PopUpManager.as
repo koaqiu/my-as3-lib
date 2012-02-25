@@ -5,6 +5,7 @@ package xBei.Manager
 	import flash.display.Stage;
 	import flash.events.MouseEvent;
 	import flash.geom.Point;
+	import flash.geom.Rectangle;
 	
 	import xBei.Interface.IPopupObject;
 
@@ -23,18 +24,13 @@ package xBei.Manager
 		 * @param target	调用此方法的对象
 		 * @param onHide	回调函数，当弹出对象隐藏时调用
 		 * @return 执行成功返回本管理器
-		 * 
 		 */
 		public static function Show(disp:DisplayObject, location:Point = null, target:DisplayObject = null, onHide:Function = null):PopUpManager {
 			if(disp == null){
 				throw new Error('xBei.Manager.PopUpManager.Show() 参数错误！必须是DisplayObject');
 				return;
-			}else if(_stage == null && disp.stage == null){
-				throw new Error('xBei.Manager.PopUpManager.Show() 严重错误！Stage 未初始化');
-				return;
-			}else if(disp.stage != null){
-				_stage = disp.stage;
 			}
+			_stage = StageManager.Instance.Stage;
 			var ppm:PopUpManager = _isPopup(disp); 
 			if(ppm == null){
 				ppm = new PopUpManager(disp, location, target, onHide);
@@ -115,24 +111,32 @@ package xBei.Manager
 			_oldParent = {
 				parent : disp.parent,
 				depth : disp.parent == null ? -1 : disp.parent.getChildIndex(disp),
-				location : new Point(disp.x,disp.y)
+				location : new Point(disp.x, disp.y)
 			};
 			this._disp = disp;
-			trace('PopUpManager.Create',this._disp is IPopupObject);
+			//trace('PopUpManager.Create',this._disp is IPopupObject);
 			this._show(location, target,onHide);
 			_stage.addEventListener(MouseEvent.MOUSE_UP, this.DPE_ClickOnStage);
 		}
+		/**
+		 * 显示
+		 * @param location
+		 * @param target
+		 * @param onHide
+		 * 历史：
+		 * 2011-12-13 修正边界检查代码
+		 */		
 		private function _show(location:Point = null, target:DisplayObject = null, onHide:Function = null):void{
 			_target = target;
 			_cb_OnHide = onHide;
-			trace('PopUpManager.Show',this._disp is IPopupObject);
+			//trace('PopUpManager.Show',this._disp is IPopupObject);
 			
 			var useLoc:Point;
 			if(location == null){
 				//未指定显示位置
 				if(_oldParent.parent == null || _disp.stage == null){
 					//显示对象不在显示列表中
-					useLoc = new Point(_stage.stageWidth / 2,_stage.stageHeight / 2);
+					useLoc = new Point(_stage.stageWidth / 2, _stage.stageHeight / 2);
 				}else{
 					useLoc = _disp.parent.localToGlobal(_oldParent.location);
 				}
@@ -141,16 +145,19 @@ package xBei.Manager
 			}
 			
 			//边界检查，调整位置
-			if(useLoc.x + this._disp.width >= _stage.stageWidth){
+			var rc:Rectangle = this._disp.getBounds(_stage);
+			if(rc.right >= _stage.stageWidth){
 				useLoc.x = _stage.stageWidth - this._disp.width -2;
-			}else if(useLoc.x < 0){
+			}else if(rc.left < 0){
 				useLoc.x = 0;
 			}
-			if(useLoc.y + this._disp.height >= _stage.stageHeight){
+			if(rc.bottom >= _stage.stageHeight){
+				//trace('调整位置', useLoc.y, this._disp.height, _disp.getBounds(_stage));
 				useLoc.y = _stage.stageHeight - this._disp.height -2;
-			}else if(useLoc.x < 0){
+			}else if(rc.top < 0){
 				useLoc.y = 0;
 			}
+			//trace('显示位置：', useLoc, rc);
 			_disp.x = useLoc.x;
 			_disp.y = useLoc.y;
 			_stage.addChild(_disp);
