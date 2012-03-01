@@ -48,7 +48,7 @@ package xBei.Helper{
 				bitmapData = new BitmapData(content.width,content.height,true,0x00000000);
 				var matrix:Matrix = new Matrix();
 				bitmapData.draw(content, matrix,null,null,null,true);
-				callBack(new Bitmap( bitmapData ));
+				callBack(new Bitmap( bitmapData ,'auto',true));
 			}
 			loader.contentLoaderInfo.addEventListener(Event.COMPLETE, getBitmapData);
 			loader.loadBytes(data);
