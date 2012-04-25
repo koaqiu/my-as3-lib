@@ -604,10 +604,10 @@ package xBei.Net{
 			this._timer.stop();
 		}
 		private function DPE_IOError(e:IOErrorEvent):void {
-			this.OnError('IOError' + e.text);
+			this.OnError('错误：找不到地址');
 		}
 		private function DPE_SecurityError(e:SecurityErrorEvent):void {
-			this.OnError('Secure Error' + e.text);
+			this.OnError('安全错误：' + e.text);
 		}
 		
 		private function DPE_DIR_Loaded(e:TimerEvent):void {
@@ -646,8 +646,10 @@ package xBei.Net{
 					this.OnTimeOut();
 				}
 			}else if(e.status != 200){
-				Logger.error('404错误 ' + this.RequestUrl.url);
-				this.OnError(StringHelper.Format('服务器错误：{0}',e.status));
+				Logger.error(e.status.toString() + '错误 ' + this.RequestUrl.url);
+				if(e.status != 404){
+					this.OnError(StringHelper.Format('服务器错误：{0}',e.status));
+				}
 			}
 		}
 		

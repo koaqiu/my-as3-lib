@@ -26,6 +26,7 @@ package xBei.Net{
 		private var _valid:Boolean = false;
 		private var _url:String;
 		private var _scheme:String = 'unknown';
+		private var _scheme_xx:String;
 		/**
 		 * 协议，目前支持http、https、ftp、mailto
 		 * @return 
@@ -270,17 +271,19 @@ package xBei.Net{
 			}
 			
 			//开始检查协议
-			var reg:RegExp = new RegExp('^([a-z]+):(/{2,3}).+','i');
+			var reg:RegExp = new RegExp('^([a-z]+):(/{2,4}).+','i');
 			var fileReg:RegExp = /^[a-z]:[\\\/]/ig;
 			if(reg.test(url)){
 				var match:Object = reg.exec(url);
 				_scheme = match[1].toLocaleLowerCase();
-				this._isLocal = _scheme == 'file' && match[2] == '///';
+				this._isLocal = _scheme == 'file';
+				_scheme_xx = String(match[2]);
 				
-				url = url.substr(_scheme.length + match[2].length + 1);
-				//trace('检查协议：',url);
+				url = url.substr(_scheme.length + _scheme_xx.length + 1);
+				//trace('检查协议：',this._isLocal,_scheme,url);
 			}else if(fileReg.test(url)){
 				_scheme = 'file';
+				//trace('本地文件!');
 				this._isLocal = true;
 				//var m_file:Object = fileReg.exec(url);
 				//url = url.substr(m_file.length);
@@ -314,13 +317,9 @@ package xBei.Net{
 			}else{
 				_port = 0;
 			}
-			//if(url.indexOf(':') != 0){
-			//	trace('格式错误！',url);
-			//	return false;
-			//}
-			
 			//解析路径
 			index = url.indexOf('/');
+			//trace('解析路径', index, url);
 			if(index > 0){
 				_host = url.substring(0, index).replace(/[\|:]/ig,'');
 				if(url.length > index + 1){
@@ -329,7 +328,7 @@ package xBei.Net{
 					var tmpAff:Array = _path.split('/').filter(function(str:String, index:int, arr:Array):Boolean{
 						return !StringHelper.IsNullOrEmpty(str);
 					});
-					
+					//trace(tmpAff);
 					if(tmpAff[tmpAff.length - 1].length > 0){
 						_file = String(tmpAff.pop());
 						_path = '/' + tmpAff.join('/') + '/';
@@ -489,7 +488,11 @@ package xBei.Net{
 			}
 			var sScheme:String = 'http://';
 			if(_scheme == 'file'){
-				sScheme = 'file:///';
+				if(_scheme_xx == '////'){
+					sScheme = 'file:///';
+				}else{
+					sScheme = 'file:' + _scheme_xx;
+				}
 			}else if(this._scheme == 'mailto'){
 				sScheme = 'mailto:';
 			}else if(_scheme.length > 0){
@@ -525,7 +528,7 @@ package xBei.Net{
 			}
 			
 			var s:String = sScheme + sAuthority + _host;
-			if(this.IsLocal){
+			if(this.IsLocal && glo.IsMac == false){
 				s += '|';
 			}
 			s += sPort + sPath + _file + sQuery + sFragment;

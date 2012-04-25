@@ -94,6 +94,7 @@ package xBei.UI {
 		override protected function createChildren():void{
 			var tw:Number = super.width;
 			var th:Number = super.height;
+			trace('组件初始化：', this.name,tw, th, this.scaleX, this.scaleY);
 			this.Scale = 1;
 			while(super.numChildren > 0){
 				super.removeChildAt(0);

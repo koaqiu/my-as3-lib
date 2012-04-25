@@ -71,12 +71,12 @@
 				'data':v
 			};
 			var json:String = '';
-			var player_version:int = int(Capabilities.version.substr(3).split(',')[0]);
-			if(player_version >=11){
-				json = glo.EncodeJson(d);
-			}else{
+			//var player_version:int = int(Capabilities.version.substr(3).split(',')[0]);
+			//if(player_version >=11){
+			//	json = glo.EncodeJson(d);
+			//}else{
 				json = com.adobe.serialization.json.JSON.encode(d);
-			}
+			//}
 			var str:String = "fl.getDocumentDOM().selection[0].parameters[\"CUIV\"].value=\"" + json + "\"";
 			MMExecute(str);
 		}

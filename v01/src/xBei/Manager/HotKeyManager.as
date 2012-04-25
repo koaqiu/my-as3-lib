@@ -42,9 +42,9 @@ package xBei.Manager
 		 * @return 
 		 * 
 		 */
-		public static function Init(stage:Stage):HotKeyManager{
+		public static function Init():HotKeyManager{
 			if(HotKeyManager._ins == null){
-				HotKeyManager._ins = new HotKeyManager(stage);
+				HotKeyManager._ins = new HotKeyManager();
 			}
 			return HotKeyManager._ins;
 		}
@@ -80,11 +80,8 @@ package xBei.Manager
 		 * @param stage
 		 * 
 		 */
-		function HotKeyManager(stage:Stage){
-			if(stage == null){
-				throw new Error('xBei.Manager.HotKeyManager 严重错误！Stage 未初始化');
-				return;
-			}else if(HotKeyManager._ins != null) {
+		function HotKeyManager(){
+			if(HotKeyManager._ins != null) {
 				throw new Error("只能有一个实例！");
 				return;
 			}
@@ -92,7 +89,7 @@ package xBei.Manager
 			this._eventObject = {};
 			this._keyMpas = [];
 			this._keys =[];
-			this._stage = stage;
+			this._stage = StageManager.Instance.Stage;
 			
 			MessageManager.AddListener([
 				DISABLED_KEYS,

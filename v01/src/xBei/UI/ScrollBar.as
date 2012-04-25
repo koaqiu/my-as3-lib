@@ -103,6 +103,7 @@
 			this.addChild(this._scrollDragBar);
 			this._scrollDragBar.addChild(this._scrollThumb);
 			this._scrollDragBar.addChild(this._scrollBarThumbIcon);
+			this.width = 16;
 		}
 		override protected function draw():void {
 			super.draw();

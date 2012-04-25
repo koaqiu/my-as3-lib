@@ -8,6 +8,7 @@ package xBei.UI {
 	
 	import xBei.AnimationMode;
 	import xBei.Events.*;
+	import xBei.Helper.StringHelper;
 	import xBei.Interface.*;
 	import xBei.Manager.*;
 	import xBei.Net.Uri;
@@ -176,6 +177,13 @@ package xBei.UI {
 				}
 			}
 			return child;
+		}
+		public function GetChildByName(pName:String, ...args):DisplayObject{
+			if(args.length == 0){
+				return super.getChildByName(pName);
+			}else{
+				return super.getChildByName(StringHelper.Format(pName, args));
+			}
 		}
 		
 		/**
@@ -489,7 +497,22 @@ package xBei.UI {
 			}
 			return false;
 		}
-		
+		public static function Setup():void{
+			Sprite.prototype.GetFullPath = function():String{
+				return getFullPath(this);
+			}
+		}
+		public static function getFullPath(disp:DisplayObject):String{
+			if(disp == null){
+				return 'null';
+			}else if(disp is Stage){
+				return 'STAGE';
+			}else if(disp.parent == null){
+				return disp.name;
+			}else{
+				return StringHelper.Format('{0}.{1}', getFullPath(disp.parent), disp.name);
+			}
+		}
 		//静态方法
 		/**
 		 * 修改对象的颜色 

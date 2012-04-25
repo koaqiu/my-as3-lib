@@ -179,39 +179,14 @@ package xBei.Helper{
 			if (iw == 0) { iw = source.width; }
 			if (ih == 0) { ih = source.height; }
 			
-			
-			var toSize:Rectangle = TestRect(iw, ih, width, height);
-			//if (toSize.width == iw && toSize.width < width &&
-			//	toSize.height == ih && toSize.height < height) {
-			//	var _scale:Number = iw / ih;
-			//	var _rect_scale:Number = width / height;
-			//	var end_w:Number = iw;
-			//	var end_h:Number = ih;
-			//	if (_scale>_rect_scale) {
-			//		end_w = width;
-			//		end_h = end_w / _scale;
-			//	} else {
-			//		end_h = height;
-			//		end_w = end_h * _scale;
-			//	}
-			//	toSize = new Rectangle(0,0,
-			//		Math.floor(end_w), 
-			//		Math.floor(end_h)
-			//	);
-			//}
-			var scaleX:Number = toSize.width / iw;
-			var scaleY:Number = toSize.height / ih;
+			var toSize:Rectangle = TestRect(source.width, source.height, width, height);
+			var scaleX:Number = toSize.width / source.width;
+			var scaleY:Number = toSize.height / source.height;
 			var bd:BitmapData = new BitmapData(toSize.width, toSize.height, true, 0x00ffffff);
 			var m:Matrix = new Matrix();
 			//m.translate(iw / 2, ih / 2);
-			m.scale(scaleX, scaleY);
+			//m.scale(scaleX, scaleY);
 			
-			//m.scale(toSize.width / iw, toSize.height / ih);
-			//m.translate(iw / 2, ih / 2);
-			//m.translate(toSize.x + iw /2 ,toSize.y + ih / 2);
-			//trace('ScaleBitmap', toSize,source.width,source.height,scaleX,scaleY);
-			//m.translate(toSize.width / 2,toSize.height /2);
-			//m.rotate(source.rotation);
 			bd.draw(source, m,null,null,null,true);
 			source.scaleX = s1;source.scaleY = s2;
 			return bd;
