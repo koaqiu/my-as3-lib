@@ -122,7 +122,7 @@ package xBei.UI
 			this.show(pIsModel);
 		}
 		protected function show(pIsModel:Boolean):void{
-			trace('显示：', this.ID);
+			trace('显示Window：', this.ID);
 			var index:int = _winList.indexOf(this);
 			if(index >= 0){
 				_winList.splice(index, 1);
@@ -239,12 +239,12 @@ package xBei.UI
 			}
 			//*/
 			
-			trace('LightBoxManager.Hide canClose=', tmpWin.CanCloseWindow, 'isshow=', tmpWin.IsShow, tmpWin.ID)
+			trace('Window.Hide canClose=', tmpWin.CanCloseWindow, 'isshow=', tmpWin.IsShow, tmpWin.ID)
 			if (tmpWin.OnBeforeHide() == false || tmpWin.CanCloseWindow == false || tmpWin.IsShow == false) {
 				return;
 			}
 			
-			trace("开始关闭 LightBox");
+			trace("开始关闭 Window", tmpWin.ID);
 			if(tmpWin.initData.HasCloseButton){
 				//第一步 隐藏按钮
 				TweenLite.to(tmpWin._closeButton, .3, {
@@ -294,13 +294,16 @@ package xBei.UI
 			if(this.parent != null){
 				this.parent.removeChild(this);
 			}
+			var id:int = this.ID;
 			if (this.initData.NoDispose == false) {
 				if(this.initData.HasCloseButton){
 					this._closeButton.removeEventListener(MouseEvent.CLICK, DPE_CloseButtonClicked);
 				}
 				this.dispose();
 			}
-			_winList.pop();
+			var index:int = _winList.indexOf(this);
+			_winList.splice(index, 1);
+			
 			if(_winList.length == 0){
 				//全局启用用热键
 				MessageManager.SendMessage(0xE0000001);
@@ -308,7 +311,7 @@ package xBei.UI
 				//全局禁用热键
 				MessageManager.SendMessage(0xE0000000);	
 			}
-			trace("完成关闭 LightBox");
+			trace("完成关闭 Window", id);
 		}
 		//Do Event
 		protected function OnBeforeShow():Boolean{
@@ -338,15 +341,21 @@ package xBei.UI
 			}
 		}
 		private function DPE_CloseButtonClicked(e:MouseEvent):void {
-			trace('LightBoxManager.Mask clicked', e.target.name);
+			trace('Window.Mask or button clicked', e.target, e.target.name);
 			var win:Window;
 			if(e.target is SimpleButton){
 				win = e.target.parent as Window;
 				Hide(win);
 			}else{
 				var l:int = _winList.length;
+				trace('一共有',l,'个窗口');
 				for(var i:int = l - 1; i >= 0; i--){
 					win = _winList[i];
+					if(win._mask != null)
+						trace('搜索',win.ID, win._mask.name, e.target.name, win._mask == e.target);
+					else
+						trace('搜索', win.ID, e.target.name, win._mask == e.target);
+					
 					if(win._mask == e.target){
 						//if(win.IsShow)
 						Hide(win);

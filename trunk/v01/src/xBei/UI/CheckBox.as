@@ -41,7 +41,7 @@ package xBei.UI {
 			this._autoSize = v;
 			if(v){
 				this._txt.autoSize = "left";
-				this._txt.y = (height-this._txt.height)/2;
+				this._txt.y = (height - this._txt.height)/2;
 			}else{
 				this._txt.autoSize = 'none';
 			}

@@ -195,12 +195,7 @@ package xBei.UI {
 		 */
 		public function AddItem(child:DisplayObject):DisplayObject {
 			var tmp:DisplayObject = _con.addChild(child);
-			//this.addChild(child);
-			//this._conRc.addChild(child);
-			//trace('add child 1',child.x,child.y,child.width);
 			this.reLayout();
-			//trace('add child 2',this._con.x,this._con.y,this._con.width,this._con.height);
-			//trace('add child 3',this._conRc.x,this._conRc.y,this._conRc.width,this._conRc.height);
 			return tmp;
 		}
 		public function AddItemAt(child:DisplayObject, index:int):DisplayObject {

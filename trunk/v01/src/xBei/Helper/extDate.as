@@ -8,7 +8,12 @@ package xBei.Helper {
 	public class extDate{
 		private var _date:Date;
 		public function extDate(year:* = null, month:* = null, date:* = null, hours:* = null, minutes:* = null, seconds:* = null, ms:* = null){
-			_date = new Date(year, month, date, hours, minutes, seconds, ms);
+			if(year is Date){
+				var d:Date = year as Date;
+				_date = new Date(d.time);
+			}else{
+				_date = new Date(year, month, date, hours, minutes, seconds, ms);
+			}
 		}
 		/// The day of the month (an integer from 1 to 31) specified by a Date object according to local time.
 		public function get date () : Number{
@@ -423,7 +428,7 @@ package xBei.Helper {
 				return this.toString();
 			}else {
 				return format.replace(/yyyy/ig, this.getFullYear()).
-					replace(/MM/g, this._f2(this.getMonth())).
+					replace(/MM/g, this._f2(this.getMonth() + 1)).
 					replace(/M/g, this.getMonth()).
 					replace(/dd/g, this._f2(this.getDate())).
 					replace(/d/g, this.getDate()).

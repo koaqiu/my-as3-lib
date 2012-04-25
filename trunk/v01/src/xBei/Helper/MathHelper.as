@@ -1,6 +1,4 @@
 package xBei.Helper {
-	import mx.effects.Fade;
-
 	public class MathHelper {
 		public function MathHelper(c:pc) {
 		}
