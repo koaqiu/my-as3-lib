@@ -285,8 +285,8 @@ package xBei.Net{
 				_scheme = 'file';
 				//trace('本地文件!');
 				this._isLocal = true;
-				//var m_file:Object = fileReg.exec(url);
-				//url = url.substr(m_file.length);
+			}else{
+				return false;
 			}
 			if(this._isLocal == false){
 				//检查端口
@@ -319,12 +319,10 @@ package xBei.Net{
 			}
 			//解析路径
 			index = url.indexOf('/');
-			//trace('解析路径', index, url);
 			if(index > 0){
 				_host = url.substring(0, index).replace(/[\|:]/ig,'');
 				if(url.length > index + 1){
 					_path = url.substr(index);
-					
 					var tmpAff:Array = _path.split('/').filter(function(str:String, index:int, arr:Array):Boolean{
 						return !StringHelper.IsNullOrEmpty(str);
 					});
@@ -333,7 +331,6 @@ package xBei.Net{
 						_file = String(tmpAff.pop());
 						_path = '/' + tmpAff.join('/') + '/';
 					}
-					
 				}
 			}else{
 				_host = url;

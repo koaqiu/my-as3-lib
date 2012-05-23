@@ -70,5 +70,20 @@ package xBei.Helper{
 			}
 			return null;
 		}
+		public static function IsHttpUri(url:String):Boolean{
+			if(StringHelper.IsNullOrEmpty(url))return false;
+			var uri:Uri = new Uri(url);
+			if(uri.Scheme == 'http' || uri.Scheme == 'https'){
+				if(StringHelper.IsNullOrEmpty(uri.Host)){
+					return false;
+				}else if(uri.Host.indexOf('.') >= 0){
+					return true;
+				}else{
+					return false;
+				}
+			}else{
+				return false;
+			}
+		}
 	}
 }

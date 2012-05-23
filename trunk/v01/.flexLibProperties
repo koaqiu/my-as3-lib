@@ -51,6 +51,16 @@
     <classEntry path="xBei.Helper.ColorHelper"/>
     <classEntry path="xBei.Manager.ResourcesManager"/>
     <classEntry path="xBei.Net.PostFileItem"/>
+    <classEntry path="xBei.Image.SVG.base.SVGElement"/>
+    <classEntry path="xBei.Image.SVG.SVGCircleElement"/>
+    <classEntry path="xBei.Image.SVG.SVGRectangleElement"/>
+    <classEntry path="xBei.Image.SVG.SVGEllipseElement"/>
+    <classEntry path="xBei.Image.SVG.SVGLineElement"/>
+    <classEntry path="xBei.Image.SVG.SVGPolylineElement"/>
+    <classEntry path="xBei.Image.SVG.SVGPolygonElement"/>
+    <classEntry path="xBei.Image.SVG.SVGPath"/>
+    <classEntry path="xBei.Image.SVG.base.SVGPathCommand"/>
+    <classEntry path="xBei.Image.SVG.base.SVGShape"/>
   </includeClasses>
   <includeResources/>
   <namespaceManifests/>

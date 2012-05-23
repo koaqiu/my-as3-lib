@@ -9,6 +9,7 @@
 	import xBei.Helper.StringHelper;
 	import xBei.Manager.HotKeyManager;
 	import xBei.Manager.MessageManager;
+	import xBei.Manager.StageManager;
 	
 	/**
 	 * 模式窗口管理
@@ -58,9 +59,9 @@
 		 * @param stage
 		 * @param args
 		 */		
-		public static function Init(stage:Stage,args:Object):void{
+		public static function Init(args:Object):void{
 			throw new Error('请使用新类：xBei.UI.Window');
-			_stage = stage;
+			_stage = StageManager.Instance.Stage;
 			//初始化.参数
 			var _args:Object = {
 				ClickMaskClose:true,

@@ -22,12 +22,18 @@
 		public static  var bal:Object = {
 			IsLocal : true
 		};
-		public static function EncodeJson(o:*):String{
-			return JSON.stringify(o);
+		public static function get FlashPlayerVersion():Array{
+			var a1:Array = Capabilities.version.split(' ');
+			var a2:Array = a1[1].split(',');
+			a2.splice(0, 0, a1[0]);
+			return a2;
 		}
-		public static function DecodeJson(str:String):*{
-			return JSON.parse(str);
-		}
+//		public static function EncodeJson(o:*):String{
+//			return JSON.stringify(o);
+//		}
+//		public static function DecodeJson(str:String):*{
+//			return JSON.parse(str);
+//		}
 		/**
 		 * 是否为空 
 		 * @param test
@@ -108,7 +114,11 @@
 		public static function DisposeDisplayObject(item:*):void{
 			if(item == null){
 				return;
-			}else if(item is Loader){
+			}
+			if(item.hasOwnProperty('parent') && item['parent'] is DisplayObjectContainer){
+				(item['parent'] as DisplayObjectContainer).removeChild(item as DisplayObject);
+			}
+			if(item is Loader){
 				(item as Loader).unloadAndStop();
 			}else if(item is IDispose){
 				(item as IDispose).dispose();
@@ -124,7 +134,7 @@
 					try{
 						base[k] = ext[k];
 					}catch(e:Error){
-						//do nothing
+						//TODO:do nothing
 					}
 				}
 			}
