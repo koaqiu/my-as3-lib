@@ -115,7 +115,7 @@ package xBei.Manager
 		* @param app		注册的对象
 		* @param command	命令
 		* @param key		快捷键
-		* @param exKey		扩展数据（Ctrl、Alt、Shirt等）
+		* @param exKey		扩展数据（Ctrl 0x2、Alt 0x1、Shirt 0x4 等）
 		* @return 成功返回true
 		*/ 
 		public function RegisterKey(app:String, command:String, key:uint, extKey:uint = 0):Boolean {

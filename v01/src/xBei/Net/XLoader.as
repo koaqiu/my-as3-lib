@@ -10,6 +10,7 @@ package xBei.Net {
 	import flash.utils.setTimeout;
 	
 	import xBei.Helper.StringHelper;
+	import xBei.Helper.UriHelper;
 	import xBei.Interface.IDispose;
 	import xBei.Net.Events.DataLoaderEvent;
 
@@ -185,11 +186,12 @@ package xBei.Net {
 		}
 		private function _checkUrl(pUrl:*):Boolean{
 			if (pUrl is String) {
-				if (String(pUrl).length == 0) {
+				if(UriHelper.IsHttpUri(pUrl)){
+					_lastRq = new URLRequest(pUrl);
+				}else{
 					this.OnError("没有地址");
 					return false;
 				}
-				_lastRq = new URLRequest(pUrl);
 			}else if (pUrl is URLRequest) {
 				_lastRq = pUrl;
 			}else if (pUrl != null) {
