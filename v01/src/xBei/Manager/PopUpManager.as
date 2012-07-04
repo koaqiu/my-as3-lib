@@ -7,6 +7,7 @@ package xBei.Manager
 	import flash.geom.Point;
 	import flash.geom.Rectangle;
 	
+	import xBei.Debug.Logger;
 	import xBei.Interface.IPopupObject;
 
 	/**
@@ -26,7 +27,7 @@ package xBei.Manager
 		 * @return 执行成功返回本管理器
 		 */
 		public static function Show(disp:DisplayObject, location:Point = null, target:DisplayObject = null, onHide:Function = null):PopUpManager {
-			if(disp == null){
+			if((disp is DisplayObject) == false){
 				throw new Error('xBei.Manager.PopUpManager.Show() 参数错误！必须是DisplayObject');
 				return;
 			}
@@ -126,41 +127,43 @@ package xBei.Manager
 		 * 历史：
 		 * 2011-12-13 修正边界检查代码
 		 */		
-		private function _show(location:Point = null, target:DisplayObject = null, onHide:Function = null):void{
+		private function _show(pLocationToShow:Point = null, target:DisplayObject = null, onHide:Function = null):void{
 			_target = target;
 			_cb_OnHide = onHide;
-			//trace('PopUpManager.Show',this._disp is IPopupObject);
 			
 			var useLoc:Point;
-			if(location == null){
+			if(pLocationToShow == null){
 				//未指定显示位置
 				if(_oldParent.parent == null || _disp.stage == null){
 					//显示对象不在显示列表中
-					useLoc = new Point(_stage.stageWidth / 2, _stage.stageHeight / 2);
+					useLoc = new Point(this._disp.x, this._disp.y); //new Point(_stage.stageWidth / 2, _stage.stageHeight / 2);
 				}else{
 					useLoc = _disp.parent.localToGlobal(_oldParent.location);
 				}
 			}else{
-				useLoc = location;
+				useLoc = pLocationToShow;
 			}
-			
+			var bak_visible:Boolean = _disp.visible;
+			_disp.visible = false;
+			_stage.addChild(_disp);
+			_disp.x = useLoc.x;
+			_disp.y = useLoc.y;
 			//边界检查，调整位置
 			var rc:Rectangle = this._disp.getBounds(_stage);
 			if(rc.right >= _stage.stageWidth){
-				useLoc.x = _stage.stageWidth - this._disp.width -2;
+				_disp.x = _stage.stageWidth - rc.width -2;
 			}else if(rc.left < 0){
-				useLoc.x = 0;
+				_disp.x = 0;
 			}
+			//Logger.info('调整位置:',rc.top, rc.bottom, _stage.stageHeight, useLoc);
 			if(rc.bottom >= _stage.stageHeight){
 				//trace('调整位置', useLoc.y, this._disp.height, _disp.getBounds(_stage));
-				useLoc.y = _stage.stageHeight - this._disp.height -2;
+				_disp.y = _stage.stageHeight - rc.height -2;
 			}else if(rc.top < 0){
-				useLoc.y = 0;
+				_disp.y = 0;
 			}
-			//trace('显示位置：', useLoc, rc);
-			_disp.x = useLoc.x;
-			_disp.y = useLoc.y;
-			_stage.addChild(_disp);
+			_disp.visible = bak_visible;
+			
 			var po:IPopupObject = _disp as IPopupObject;
 			if(po != null){
 				po.IsPopuped = true;
