@@ -45,7 +45,7 @@ package xBei.Helper{
 		 * @return	Boolean
 		 */
 		public static function IsNullOrEmpty(str:*):Boolean {
-			if(str == null || str == undefined){
+			if(str == null || str == undefined || String(str).length == 0){
 				return true;
 			}else {
 				return String(str).replace(/\s/ig,"").length == 0;

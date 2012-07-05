@@ -61,6 +61,10 @@
     <classEntry path="xBei.Image.SVG.SVGPath"/>
     <classEntry path="xBei.Image.SVG.base.SVGPathCommand"/>
     <classEntry path="xBei.Image.SVG.base.SVGShape"/>
+    <classEntry path="xBei.Helper.ArraryHelper"/>
+    <classEntry path="xBei.Helper.XSpriteHelper"/>
+    <classEntry path="xBei.iterator.IIterator"/>
+    <classEntry path="xBei.iterator.NullIterator"/>
   </includeClasses>
   <includeResources/>
   <namespaceManifests/>

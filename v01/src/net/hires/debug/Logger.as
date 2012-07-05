@@ -33,6 +33,7 @@ package net.hires.debug {
 	import flash.text.TextFieldAutoSize;
 	import flash.text.TextFormat;
 	
+	import xBei.Debug.Logger;
 	import xBei.Helper.StringHelper;
 
 	public class Logger extends Sprite {
@@ -92,6 +93,9 @@ package net.hires.debug {
 		}
 
 		public static function log( msg : *, level : int = 0 ):void {
+			if(monitors.length == 0){
+				xBei.Debug.Logger.log(msg, level);
+			}
 			stack.push([msg,level]);
 
 			for (var i:int = 0; i < monitors.length; i++)

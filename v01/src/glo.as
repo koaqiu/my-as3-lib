@@ -1,10 +1,13 @@
 ﻿package {
+	import avmplus.getQualifiedClassName;
+	
 	import flash.display.*;
 	import flash.events.*;
 	import flash.net.*;
 	import flash.system.Capabilities;
 	import flash.utils.*;
 	
+	import xBei.Interface.IClone;
 	import xBei.Interface.IDispose;
 
 	/**
@@ -203,7 +206,17 @@
 		public static function CreateObject(className:String):Object {
 			return new (getDefinitionByName(className) as Class)();
 		}
-		public static function Clone(obj:Object):* {
+		public static function Clone(obj:Object, isDeep:Boolean = true):* {
+			if(obj is IClone)
+				return IClone(obj).Clone(isDeep);
+			else if(obj is Vector || obj is Array || getQualifiedClassName(obj).indexOf('::Vector.') > 0){
+				var l:int = obj.length;
+				var rt:* = new (getDefinitionByName(getQualifiedClassName(obj)) as Class)();
+				for(var i:int = 0; i < l;i ++){
+					rt[i] = Clone(obj[i], isDeep);
+				}
+				return rt;
+			}
 			var copier:ByteArray = new ByteArray();
 			copier.writeObject(obj);
 			copier.position = 0;
