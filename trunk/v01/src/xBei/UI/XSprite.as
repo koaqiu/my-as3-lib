@@ -178,6 +178,24 @@ package xBei.UI {
 			}
 			return child;
 		}
+		/**
+		 * 将子项添加到target的前面
+		 * @param child
+		 * @param target
+		 * @return 
+		 */
+		public function AddChildAfter(child:DisplayObject, target:DisplayObject):DisplayObject{
+			if(child == null)throw new ArgumentError('child不能为空（null）');
+			if(target == null)throw new ArgumentError('target不能为空（null）');
+			else if(target.parent == null || target.parent != this)throw new ArgumentError('target错误');
+			var index:int = this.getChildIndex(target) + 1;
+			if(index >= this.numChildren){
+				this.addChild(child);
+			}else{
+				this.addChildAt(child, index);
+			}
+			return child;
+		}
 		public function GetChildByName(pName:String, ...args):DisplayObject{
 			if(args.length == 0){
 				return super.getChildByName(pName);
