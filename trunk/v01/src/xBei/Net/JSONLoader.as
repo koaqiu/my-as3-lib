@@ -1,4 +1,6 @@
 package xBei.Net{
+	//import com.adobe.serialization.json.JSON;
+	
 	import com.adobe.serialization.json.JSON;
 	
 	import flash.net.URLLoaderDataFormat;
@@ -21,54 +23,63 @@ package xBei.Net{
 				return _jsonData;
 			}
 		}
+		private var _isImg:Boolean;
+		override public function GetImage(pUrl:*, options:Object=null, callBack:Function=null):void
+		{
+			this._isImg = true;
+			super.GetImage(pUrl, options, callBack);
+		}
+		
 		override protected function runCallBackFunc(resultData:*):void{
-			//trace('JSONLoader.runCallBackFunc');
-			if(this.dataFormat == URLLoaderDataFormat.TEXT){
-				resultData['resultData'] = this.JSONObject;				
-			}
+			resultData['resultData'] = this.JSONObject;				
 			super.runCallBackFunc(resultData);
 		}
+		override protected function getOption(pName:String, dv:*):*{
+			if(pName == 'dataFormat'){
+				return this._isImg ? URLLoaderDataFormat.BINARY : URLLoaderDataFormat.TEXT;
+			}
+			return super.getOption(pName, dv);
+		}
 		override protected function OnDataLoaded():void {
-			if(this.dataFormat == URLLoaderDataFormat.BINARY){
-				super.OnDataLoaded();
-			}else{
+			if(this.dataFormat == URLLoaderDataFormat.TEXT){
 				try {
 					this._jsonData = decode(this.ResultData);
-					super.OnDataLoaded();
-				}catch(error:ArgumentError){
-					//trace('参数错误：',error.toString());
-					super.OnError("参数错误： \n"+String(error)+"\n\n"+String(super.ResultData));
-					this._jsonData = {
-						'success':false,
-						'message':'参数错误'
-					}
+					
+				//}catch(error:ArgumentError){
+				//	this._jsonData = {
+				//		'success':false,
+				//		'message':'参数错误'
+				//	}
+				//	super.OnError("参数错误： \n"+String(error)+"\n\n"+String(super.ResultData));
+				//	return;
 				}catch (error:Error) {
-					//trace('错误！',error, this.ResultData);
-					super.OnError("解析失败！ \n"+String(error)+"\n\n"+String(super.ResultData));
 					this._jsonData = {
 						'success':false,
 						'message':'解析失败'
 					}
+					super.OnError("解析失败！ \n" + String(error) + "\n\n" + error.getStackTrace() + "\n\n" + String(super.ResultData));
+					return;
 				}
 			}
+			super.OnDataLoaded();
 		}
 		protected function encode( o:Object ):String {
-			//var player_version:int = int(Capabilities.version.substr(3).split(',')[0]);
-			//if(player_version >=11){
-			//	return glo.EncodeJson(o);
-			//}else{
+			var player_version:int = int(Capabilities.version.substr(3).split(',')[0]);
+			if(player_version >=11){
+				return glo.EncodeJson(o);
+			}else{
 				return com.adobe.serialization.json.JSON.encode(o);
-			//}
+			}
 		}
 		protected function decode( s:String ):* {
 			//trace(Capabilities.version);
-			//var player_version:int = int(Capabilities.version.substr(3).split(',')[0]);
-			//if(player_version >=11){
-			//	return glo.DecodeJson(s);
-			//}else{
+			var player_version:int = int(Capabilities.version.substr(3).split(',')[0]);
+			if(player_version >=11){
+				return glo.DecodeJson(s);
+			}else{
 				return com.adobe.serialization.json.JSON.decode(s);
-			//}
+			}
 			//return JSON.decode(s);
 		}
-	}
+	}//end class
 }
