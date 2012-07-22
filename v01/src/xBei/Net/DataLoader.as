@@ -5,11 +5,13 @@ package xBei.Net{
 	import flash.utils.ByteArray;
 	import flash.utils.Timer;
 	
-	import net.hires.debug.Logger;
-	
+	import xBei.Debug.Logger;
+	import xBei.Helper.ArraryHelper;
 	import xBei.Helper.StringHelper;
 	import xBei.Net.Events.DataLoaderEvent;
 	
+	
+	use namespace xbei_internal;
 	/**
 	 * 连接超时 
 	 */
@@ -223,7 +225,6 @@ package xBei.Net{
 		/**
 		 * 是否是调试模式 
 		 * @return 
-		 * 
 		 */
 		public function get IsDebug():Boolean { return _isDebug; }
 		public function set IsDebug(v:Boolean):void {
@@ -263,17 +264,41 @@ package xBei.Net{
 			return _resultData;
 		}
 		
+		private var _requestData:*;
+
 		/**
 		 * 要发送的数据（POST） 
 		 */
-		public var RequestData:*;
+		public function get RequestData():*
+		{
+			return _requestData;
+		}
+
+		/**
+		 * @private
+		 */
+		public function set RequestData(value:*):void
+		{
+			_requestData = value;
+		}
+
+		private var _options:Object;
+		private var _url:Uri;
+		private var _qs:RequestQueryString;
 		/**
 		 * 参数（GET） 
 		 */
-		public var QueryString:*;
+		public function get QueryString():RequestQueryString{
+			if(this._url == null){
+				return this._qs;
+			}else{
+				return this._url.QueryString;
+			}
+		}
 		
 		public function DataLoader(){
 			super();
+			this._qs = new RequestQueryString();
 			this.addEventListener(Event.OPEN, DPE_BeginTransfer);
 			this.addEventListener(Event.COMPLETE, DPE_DataLoaded);
 			this.addEventListener(HTTPStatusEvent.HTTP_STATUS, DPE_HttpStatusChanged);
@@ -289,105 +314,150 @@ package xBei.Net{
 			}
 		}
 		private function _checkUrl(pUrl:*):Boolean{
-			if (pUrl is String) {
-				if (String(pUrl).length == 0) {
-					this.OnError("没有地址");
-					return false;
+			var check:Boolean = false;
+			if (!StringHelper.IsNullOrEmpty(pUrl)) {
+				if(pUrl is String){
+					this._url = new Uri(String(pUrl));
+					check = true;
+				}else if(pUrl is Uri){
+					this._url = pUrl;
+					check = true;
+				}else if (pUrl is URLRequest) {
+					_lastRq = pUrl;
+					this._url = new Uri(this._lastRq.url);
+					check = true;
+				}else if (pUrl != null) {
+					this._url = new Uri(pUrl.toString());
+					check = true;
 				}
-				_lastRq = new URLRequest(pUrl);
-			}else if (pUrl is URLRequest) {
-				_lastRq = pUrl;
-			}else if (pUrl != null) {
-				_lastRq = new URLRequest(pUrl.toString());
-			}else {
-				this.OnError("没有地址");
-				return false;
 			}
-			return true;
+			if(check){
+				this._url.QueryString.Combine(this._qs);
+				_lastRq = new URLRequest(this._url.toString());
+				//if(this._options != null && this._options.hasOwnProperty('method')){
+				//	_lastRq.method = this._options['method'];
+				//}
+				this._lastRq.method = this.getOption('method', URLRequestMethod.GET);
+				_lastRq.data = this.prepareRequest();
+			}else{
+				this.OnError("没有地址");
+			}
+			return check;
 		}
 		//public
 		/**
-		 * 
+		 * 加载数据（默认使用get）
 		 * @param	pUrl		要加载的地址
-		 * @param	timeOut		超时，0  表示使用默认值（30秒）
+		 * @param	options		参数，{
+		 * 	'timeout':30,//超时，0  表示使用默认值（30秒）
+		 * 	'method':'get',
+		 * 	'dataFormat':'text'
+		 * }
 		 * @param	callBack	回调函数 function(data:*, loader:DataLoader):Boolean;
 		 */	
-		public function Load(pUrl:*, timeOut:int = 0, callBack:Function = null):void {
-			//trace('DataLoader.Load');
+		public function Load(pUrl:*, options:Object = null, callBack:Function = null):void {
+			this._setOptions(options);
+			this._callBack = callBack;
+			this._mode = 0;
 			if(this._checkUrl(pUrl)){
-				_mode = 0;
-				this._initTimer(timeOut);
-				this._callBack = callBack;
-				this._timer.addEventListener(TimerEvent.TIMER, DPE_TimeOut);
-				this._timer.start();
+				super.dataFormat = this.getOption('dataFormat', URLLoaderDataFormat.TEXT);
+				this._setupTimerAndStart();
 				super.load(_lastRq);
 			}
 		}
 		/**
 		 * 用POST方法提交数据
-		 * @param url
-		 * @param callBack
-		 */		
-		public function Post(url:String, callBack:Function = null):void{
-			//trace('DataLoader.Post:',url);
-			var rq:URLRequest = new URLRequest(url);
-			rq.method = URLRequestMethod.POST;
-			rq.data = this.prepareRequest();
-			super.dataFormat = URLLoaderDataFormat.TEXT;
-			this.Load(rq, 30, callBack);
+		 * @param	pUrl		要加载的地址
+		 * @param	options		参数，{
+		 * 	'timeout':30,//超时，0  表示使用默认值（30秒）
+		 * 	'method':'post',//忽略此参数
+		 * 	'dataFormat':'text'
+		 * }
+		 * @param	callBack	回调函数 function(data:*, loader:DataLoader):Boolean;
+		 */	
+		public function Post(pUrl:*, options:Object = null, callBack:Function = null):void{
+			this.Load(pUrl, options == null ? {'method' : URLRequestMethod.POST}:
+								glo.Extends(options, {'method' : URLRequestMethod.POST}),
+								callBack);
 		}
-		public function MyPost(url:String, data:Object, headers:Array = null, callBack:Function = null):void{
-			var rq:URLRequest = new URLRequest(url);
-			rq.method = URLRequestMethod.POST;
-			this.setHeader(rq, new URLRequestHeader("Cache-Control", "no-cache"));
-			this.setHeader(rq, new URLRequestHeader("Content-Type", "multipart/form-data; boundary=" + getBoundary()));
-			
-			rq.data = this.getMultipart(data);
-			if(headers != null && headers.length > 0){
-				for(var i:int = 0; i < headers.length; i++){
-					var header:Object = headers[i];
-					this.setHeader(rq, new URLRequestHeader(header.key, header.value));
+		/**
+		 * 用POST方法提交数据
+		 * @param	pUrl		要加载的地址
+		 * @param	options		参数，{
+		 * 	'timeout':30,//超时，0  表示使用默认值（30秒）
+		 * 	'method':'post',//忽略此参数
+		 * 	'dataFormat':'text'
+		 * }
+		 * @param	callBack	回调函数 function(data:*, loader:DataLoader):Boolean;
+		 */	
+		public function MyPost(pUrl:*, headers:Array = null, options:Object = null, callBack:Function = null):void{
+			this._callBack = callBack;
+			this._setOptions(options, {'method' : URLRequestMethod.POST});
+			if(this._checkUrl(pUrl)){
+				//_lastRq.method = URLRequestMethod.POST;
+				this.setHeader(_lastRq, new URLRequestHeader("Cache-Control", "no-cache"));
+				this.setHeader(_lastRq, new URLRequestHeader("Content-Type", "multipart/form-data; boundary=" + getBoundary()));
+				
+				_lastRq.data = this.getMultipart(_lastRq.data);
+				if(ArraryHelper.HasItems(header)){
+					for(var i:int = 0; i < headers.length; i++){
+						var header:Object = headers[i];
+						this.setHeader(_lastRq, new URLRequestHeader(header.key, header.value));
+					}
 				}
+				super.dataFormat = this.getOption('dataFormat', URLLoaderDataFormat.TEXT);
+				this._setupTimerAndStart();
+				super.load(_lastRq);
 			}
-			super.dataFormat = URLLoaderDataFormat.TEXT;
-			this.Load(rq, 30, callBack);
 		}
-		private function setHeader(rq:URLRequest, header:URLRequestHeader):void	{
-			rq.requestHeaders.push(header);
-		}
-		public function GetImage(url:String, callBack:Function = null):void{
-			var rq:URLRequest = new URLRequest(url);
-			rq.method = URLRequestMethod.POST;
-			rq.data = this.prepareRequest();
-			super.dataFormat = URLLoaderDataFormat.BINARY;
-			this.Load(rq, 30, callBack);
+		/**
+		 * 请求图片资源
+		 * @param	pUrl		要加载的地址
+		 * @param	options		参数，{
+		 * 	'timeout':30,//超时，0  表示使用默认值（30秒）
+		 * 	'method':'get',
+		 * 	'dataFormat':'text'
+		 * }
+		 * @param	callBack	回调函数 function(data:*, loader:DataLoader):Boolean;
+		 */	
+		public function GetImage(pUrl:*, options:Object = null, callBack:Function = null):void{
+			this.Load(pUrl, options == null ? {'dataFormat' : URLLoaderDataFormat.BINARY}:
+				glo.Extends(options, {'dataFormat' : URLLoaderDataFormat.BINARY}),
+				callBack);
+			
+			//this._setOptions(options);
+			//this._callBack = callBack;
+			//this._mode = 0;
+			//if(this._checkUrl(url)){
+			//	super.dataFormat = URLLoaderDataFormat.BINARY;
+			//	this._setupTimerAndStart();
+			//	super.load(_lastRq);
+			//}
 		}
 		/**
 		 * 上传文件 
 		 * @param fileToUpload	要上传的文件
-		 * @param Url			目的地址
-		 * @param timeOut		超时，0  表示使用默认值（30秒）
-		 * @param callBack
+		 * @param	pUrl		要加载的地址
+		 * @param	options		参数，{
+		 * 	'timeout':30,//超时，0  表示使用默认值（30秒）
+		 * 	'method':'post',//忽略此参数
+		 * 	'dataFormat':'text'
+		 * }
+		 * @param	callBack	回调函数 function(data:*, loader:DataLoader):Boolean;
 		 */
-		public function UploadFile(fileToUpload:FileReference,pUrl:*, timeOut:int = 0,callBack:Function = null):void {
-			if(fileToUpload !=null && this._checkUrl(pUrl)){
+		public function UploadFile(fileToUpload:FileReference, pUrl:*, options:Object = null, callBack:Function = null):void {
+			this._callBack = callBack;
+			this._setOptions(options, {'method' : URLRequestMethod.POST});
+			if(fileToUpload != null && this._checkUrl(pUrl)){
 				_mode = 1;
-				this._initTimer(timeOut);
 				_file = fileToUpload;
-				
 				_file.addEventListener(Event.OPEN,DPE_BeginTransfer);
 				_file.addEventListener(IOErrorEvent.IO_ERROR, DPE_IOError);
 				_file.addEventListener(SecurityErrorEvent.SECURITY_ERROR, DPE_SecurityError);
 				_file.addEventListener(DataEvent.UPLOAD_COMPLETE_DATA, DPE_upload_complete_data);
 				_file.addEventListener(ProgressEvent.PROGRESS, DPE_ProgressChanged);
-				
-				this._callBack = callBack;
-
-				this._timer.addEventListener(TimerEvent.TIMER, DPE_TimeOut);
-				this._timer.start();
-				
+				this._setupTimerAndStart();
 				_file.upload(this._lastRq);
-				
 			}
 		}
 		/**
@@ -412,7 +482,6 @@ package xBei.Net{
 		 */
 		public function Close():void{
 			if(_mode == 0){
-				//trace('%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%');
 				super.close();
 			}else if(_mode == 1){
 				_file.cancel();
@@ -421,7 +490,6 @@ package xBei.Net{
 		/**
 		 * 准备要发送的参数 
 		 * @return 
-		 * 
 		 */
 		protected function prepareRequest():URLVariables {
 			var uv:URLVariables = new URLVariables();
@@ -435,37 +503,63 @@ package xBei.Net{
 		/**
 		 * 准备 Url 
 		 * @return 
-		 * 
 		 */
 		protected function prepareUrl():String {
-			var qs:String = '';
-			if(this.IsDebug){
-				qs += 'debug=0bb595a26db8fdb9556a298bcd092ab7';
-			}
-			if (this.QueryString != null) {
-				for (var k:Object in this.QueryString) {
-					var data:Object = this.QueryString[k];
-					if (glo.IsNullOrUndefined(data) == false) {
-						qs += StringHelper.Format("&{0}={1}", k, data.toString());
-					}
-				}
-			}
-			return qs;
+//			var qs:String = '';
+//			if(this.IsDebug){
+//				qs += 'debug=0bb595a26db8fdb9556a298bcd092ab7';
+//			}
+//			if (this.QueryString != null) {
+//				for (var k:Object in this.QueryString) {
+//					var data:Object = this.QueryString[k];
+//					if (glo.IsNullOrUndefined(data) == false) {
+//						qs += StringHelper.Format("&{0}={1}", k, data.toString());
+//					}
+//				}
+//			}
+//			return qs;
+			throw new Error('不使用！');
 		}
 		protected function runCallBackFunc(resultData:*):void{
-			//trace('DataLoader.runCallBackFunc');
 			if (this._callBack != null) {
 				var cb:Function = this._callBack;
 				this._callBack = null;
 				try{
-					cb(resultData, this);
+					cb.call(this, resultData, this);
 				}catch(error:ArgumentError){
-					this.OnError('CallBack错误，正确的回调函数结构为：function(data:*,loader:*):Boolan{}');
+					this._callBack = null;
+					throw new ArgumentError('CallBack错误，正确的回调函数结构为：function(data:*,loader:*):Boolan{}');
 				}
-				//trace('call back 执行完毕');
-			}else{
-				//trace('DataLoader.OnDataLoaded callback is null');
 			}
+		}
+		protected function getOption(pName:String, dv:*):*{
+			if(this._options != null && this._options.hasOwnProperty(pName)){
+				return this._options[pName];
+			}
+			return dv;
+		}
+		private function _setupTimerAndStart():void{
+			this.TimeOut = this.getOption('timeout', this.TimeOut);
+			this._timer.delay = this._timeOut * 1000;
+			this._timer.addEventListener(TimerEvent.TIMER, DPE_TimeOut);
+			this._timer.start();
+		}
+		private function _closeTimer():void{
+			this._timer.removeEventListener(TimerEvent.TIMER, DPE_TimeOut);
+			this._timer.stop();
+		}
+		
+		private function _setOptions(options:Object, dv:Object = null):void{
+			if(options != null && dv != null){
+				this._options = glo.Extends(options, dv);
+			}else if(dv != null){
+				this._options = dv;
+			}else{
+				this._options = options;
+			}
+		}
+		private function setHeader(rq:URLRequest, header:URLRequestHeader):void	{
+			rq.requestHeaders.push(header);
 		}
 		private function getMultipart(dataToSend:Object):ByteArray{
 			var body:ByteArray = new ByteArray;
@@ -538,10 +632,8 @@ package xBei.Net{
 		 * @return 
 		 */
 		protected function OnDataLoaded():void {
-			this._timer.removeEventListener(TimerEvent.TIMER, DPE_TimeOut);
-			this._timer.stop();
+			this._closeTimer();
 			this.dispatchEvent(new DataLoaderEvent(DataLoaderEvent.DATA_LOADED));
-			//trace('DataLoader.OnDataLoaded');
 			this.runCallBackFunc({
 				'success':true,
 				'resultData':this.data
@@ -552,13 +644,10 @@ package xBei.Net{
 		 * @param msg
 		 */
 		protected function OnError(msg:String):void {
+			this._closeTimer();
 			_errMessage = msg;
-			//trace('加载', this._lastRq == null ?'null':this._lastRq.url,'时发生错误：', msg);
 			Logger.error(StringHelper.Format('加载错误：{0}', msg));
-			this._timer.removeEventListener(TimerEvent.TIMER, DPE_TimeOut);
-			this._timer.stop();
 			this.dispatchEvent(new DataLoaderEvent(DataLoaderEvent.ERROR));
-			//try{this.Close();}catch(error:Error){}
 			this.runCallBackFunc({
 				'success':false,
 				'error':DataLoaderEvent.ERROR,
@@ -569,10 +658,7 @@ package xBei.Net{
 		 * 加载超时 
 		 */
 		protected function OnTimeOut():void {
-			//trace("time out",this._lastRq.url);
-			this._timer.removeEventListener(TimerEvent.TIMER, DPE_TimeOut);
-			this._timer.stop();
-			//try{this.Close();}catch(error:Error){}
+			this._closeTimer();
 			this.dispatchEvent(new DataLoaderEvent(DataLoaderEvent.TIME_OUT));
 			this.runCallBackFunc({
 				'success':false,
@@ -584,8 +670,7 @@ package xBei.Net{
 		 * 网络离线 
 		 */
 		protected function OnOffline():void {
-			this._timer.removeEventListener(TimerEvent.TIMER, DPE_TimeOut);
-			this._timer.stop();
+			this._closeTimer();
 			this.dispatchEvent(new DataLoaderEvent(DataLoaderEvent.OFFLINE));
 			this.runCallBackFunc({
 				'success':false,
@@ -600,8 +685,7 @@ package xBei.Net{
 			}
 		}
 		private function DPE_BeginTransfer(e:Event):void {
-			this._timer.removeEventListener(TimerEvent.TIMER, DPE_TimeOut);
-			this._timer.stop();
+			this._closeTimer();
 		}
 		private function DPE_IOError(e:IOErrorEvent):void {
 			this.OnError('错误：找不到地址');

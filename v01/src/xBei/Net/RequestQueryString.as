@@ -1,6 +1,8 @@
 package xBei.Net{
 	import flash.net.URLVariables;
 	
+	import xBei.Helper.StringHelper;
+	
 	/**
 	 * 请求地址查询参数支持 
 	 * @author KoaQiu
@@ -62,6 +64,29 @@ package xBei.Net{
 			}
 		}
 		/**
+		 * 合并参数
+		 * @param data
+		 */
+		public function Combine(data:*):void{
+			var qs:String = '';
+			if(data is RequestQueryString){
+				qs = RequestQueryString(data).toString();
+			}else if(data is URLVariables){
+				qs = URLVariables(data).toString();
+			}else if(!StringHelper.IsNullOrEmpty(data)){
+				qs = String(data);
+			}else if(data != null){
+				qs = data.toString();
+			}else{
+				return;
+			}
+			
+			try	{
+				super.decode(qs);
+			} catch(error:Error) {
+			}
+		}
+		/**
 		 * 从QueryString中读取Int
 		 * @param	key
 		 * @param	dv
@@ -71,9 +96,15 @@ package xBei.Net{
 			if (this.hasOwnProperty(key) == false || this[key] == null) {
 				return dv;
 			}
-			try{
-				return int(this[key]);
-			}catch (err:Error) {
+			var str:String = String(this[key]);
+			if(StringHelper.IsNullOrEmpty(str)){
+				return dv;
+			}else{
+				if(str.match(/^\d{1,}\.{0,1}\d{0,}$/ig)){
+					return parseInt(str);
+				}else{
+					return dv;
+				}
 			}
 			return dv;
 		}
