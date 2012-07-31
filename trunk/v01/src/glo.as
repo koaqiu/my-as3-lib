@@ -16,7 +16,7 @@
 	 * @author KoaQiu
 	 * 
 	 */
-	public class glo {
+	public final class glo {
 		/**
 		 * 用于实现全局数据共享
 		 * 使用方法：glo.bal.yourdata=value;
@@ -31,12 +31,12 @@
 			a2.splice(0, 0, a1[0]);
 			return a2;
 		}
-//		public static function EncodeJson(o:*):String{
-//			return JSON.stringify(o);
-//		}
-//		public static function DecodeJson(str:String):*{
-//			return JSON.parse(str);
-//		}
+		public static function EncodeJson(o:*, replacer:* = null, space:* = null):String{
+			return JSON.stringify(o, replacer, space);
+		}
+		public static function DecodeJson(str:String, reviver:Function = null):*{
+			return JSON.parse(str, reviver);
+		}
 		/**
 		 * 是否为空 
 		 * @param test
@@ -44,7 +44,7 @@
 		 * 
 		 */
 		public static function IsNullOrUndefined(test:*):Boolean {
-			return test == null || test == undefined;
+			return test === null || test === undefined || typeof(test) === 'undefined';
 		}
 		/**
 		 * 根据当前语言跳转
@@ -209,18 +209,25 @@
 		public static function Clone(obj:Object, isDeep:Boolean = true):* {
 			if(obj is IClone)
 				return IClone(obj).Clone(isDeep);
-			else if(obj is Vector || obj is Array || getQualifiedClassName(obj).indexOf('::Vector.') > 0){
-				var l:int = obj.length;
-				var rt:* = new (getDefinitionByName(getQualifiedClassName(obj)) as Class)();
-				for(var i:int = 0; i < l;i ++){
-					rt[i] = Clone(obj[i], isDeep);
+			else if(obj is Array || getQualifiedClassName(obj).indexOf('::Vector.') > 0){
+				if(isDeep){
+					var l:int = obj.length;
+					var rt:* = new (getDefinitionByName(getQualifiedClassName(obj)) as Class)();
+					for(var i:int = 0; i < l;i ++){
+						rt[i] = Clone(obj[i], isDeep);
+					}
+					return rt;
+				}else if(obj is Array){
+					return (obj as Array).concat();
+				}else{
+					var rt1:* = new (getDefinitionByName(getQualifiedClassName(obj)) as Class)();
+					return rt1.concat();
 				}
-				return rt;
 			}
 			var copier:ByteArray = new ByteArray();
 			copier.writeObject(obj);
 			copier.position = 0;
 			return copier.readObject();
 		}
-	}
+	}//end class
 }

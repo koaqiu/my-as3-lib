@@ -54,7 +54,20 @@ package xBei.Debug {
 		private var _toolBars:XSprite;
 		private var logs:Array = [];
 
-		public function Logger(level : int = 1, global : Boolean = true) {
+		private var _height:Number;
+		private static var _cache_logs:Array = [];
+		
+		private static var _noDebug:Boolean = false; 
+		public static function set NoDebug(v:Boolean):void{
+			_noDebug = v;
+			if(v){
+				_cache_logs = [];
+				_clear();
+			}
+		}
+		
+		public function Logger(height:Number = 40, level : int = 1, global : Boolean = true) {
+			_height = height;
 			if(_inc == null){
 				_inc = this;
 			}else{
@@ -71,7 +84,7 @@ package xBei.Debug {
 
 			textBox = new TextField();
 			textBox.y = 10;
-			textBox.height = 40;
+			textBox.height = height;
 			textBox.multiline = true;
 			textBox.defaultTextFormat = new TextFormat("_sans", 10, 0xFFFFFF);
 			addChild(textBox);
@@ -82,6 +95,15 @@ package xBei.Debug {
 			this._clear();
 			this.addEventListener(MouseEvent.ROLL_OVER, DPE_RollOver);
 			this.addEventListener(MouseEvent.ROLL_OUT, DPE_RollOver);
+			
+			for(var i:int = 0; i < _cache_logs.length; i++){
+				var log:Object = _cache_logs[i];
+				var level:int = int(log.level);
+				if((_showLog & level) == level){
+					this._addLog(log.msg, level);
+				}
+			}
+			_cache_logs = [];
 		}
 		private function DPE_RollOver(e:MouseEvent):void{
 			if(e.type == MouseEvent.ROLL_OVER){
@@ -161,8 +183,15 @@ package xBei.Debug {
 		}
 
 		public static function log( msg : *, level : int = 1 ):void {
-			if(_inc != null){
+			if(_noDebug){
+				//do noThing
+			}else if(_inc != null){
 				_inc._log( msg, level );
+			}else{
+				_cache_logs.push({
+					'level':level,
+					'msg':msg
+				});
 			}
 		}
 
@@ -215,7 +244,7 @@ package xBei.Debug {
 			bgBox.width = textBox.width + 10;
 			textBox.autoSize = 'none';
 			
-			textBox.height = 40;
+			textBox.height = _height;
 			textBox.scrollV = textBox.maxScrollV;
 			
 			//bgBox.width = textBox.width;

@@ -31,7 +31,11 @@ package xBei.Net{
 		}
 		
 		override protected function runCallBackFunc(resultData:*):void{
-			resultData['resultData'] = this.JSONObject;				
+			if(this.dataFormat == URLLoaderDataFormat.TEXT){
+				resultData['resultData'] = this.JSONObject;
+			}else{
+				resultData['resultData'] = this.data;
+			}
 			super.runCallBackFunc(resultData);
 		}
 		override protected function getOption(pName:String, dv:*):*{

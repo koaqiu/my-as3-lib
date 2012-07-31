@@ -2,6 +2,16 @@ package xBei.Helper {
 	public class MathHelper {
 		public function MathHelper(c:pc) {
 		}
+		
+		public static function Range(v:Number, min:Number, max:Number):Number{
+			if(v < min){
+				return min;
+			}else if(v > max){
+				return max;
+			}else{
+				return v;
+			}
+		}
 		/**
 		 * 返回由参数 x 指定的数字或表达式的下限值
 		 * 下限值是小于等于指定数字或表达式的最接近的整数。
