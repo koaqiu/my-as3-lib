@@ -1,12 +1,12 @@
 package {
 
-	public class License {
+	public final class License {
 		
-		public function License(){
+		public function License(c:pc){
 			
 		}
 		public static function Encode(str:String, sn_len:int = 16):String{
-			var l:License = new License();
+			var l:License = new License(new pc());
 			return l._encode(str,sn_len);
 		}
 		private function add2(x:int, y:int):int {
@@ -83,5 +83,6 @@ package {
 			}
 			return (sn);
 		}
-	}
+	}//end class
 }
+class pc{}

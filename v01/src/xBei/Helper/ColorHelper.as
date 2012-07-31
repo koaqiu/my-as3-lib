@@ -1,6 +1,9 @@
 package xBei.Helper
 {
-	public class ColorHelper
+	import xBei.Drawing.CMYKColor;
+	import xBei.Drawing.RGBColor;
+
+	public final class ColorHelper
 	{
 		public static const blue:uint = 0xFF;
 		public static const green:uint = 0x8000;
@@ -149,8 +152,89 @@ package xBei.Helper
 		public static const whitesmoke:uint = 0xF5F5F5;
 		public static const yellow:uint = 0xFFFF00;
 		public static const yellowgreen:uint = 10145074;
-		public function ColorHelper()
+		
+		public function ColorHelper(c:pc)
 		{
 		}
-	}
+		
+		public static function RGBtoCMYK(...args):CMYKColor{
+			var r:uint, g:uint, b:uint;
+			if(args.length == 1 && args[0] is RGBColor){
+				var rgb:RGBColor = args[0] as RGBColor;
+				r = rgb.R;
+				g = rgb.G;
+				b = rgb.B;
+			}else if(args.length > 2){
+				r = parseInt(String(args[0]));
+				g = parseInt(String(args[1]));
+				b = parseInt(String(args[2]));
+			}else{
+				throw new ArgumentError('参数错误！(RGBColor)或者(r,g,b)');
+			}
+			var C3:Number = 1 - MathHelper.Range(r, 0, 255) / 255;
+			var M3:Number = 1 - MathHelper.Range(g, 0, 255) / 255;
+			var Y3:Number = 1 - MathHelper.Range(b, 0, 255) / 255;
+			var K4:Number = FindMinimum(C3, M3, Y3);
+			var cmyk:CMYKColor;
+			
+			if (K4 == 1) {
+				cmyk = new CMYKColor(0, 0, 0, 1);
+			}else {
+				cmyk = new CMYKColor((C3 - K4) / (1 - K4),
+					(M3 - K4) / (1 - K4),
+					(Y3 - K4) / (1 - K4),
+					K4);
+			}
+			return cmyk;
+		}
+		public static function CMYKtoRGB(...args):RGBColor
+		{
+			var c:uint, m:uint, y:uint, k:uint;
+			if(args.length == 1 && args[0] is CMYKColor){
+				var cmyk:CMYKColor = args[0] as CMYKColor;
+				c = cmyk.C;
+				m = cmyk.M;
+				y = cmyk.Y;
+				k = cmyk.K
+			}else if(args.length > 3){
+				c = parseInt(String(args[0]));
+				m = parseInt(String(args[1]));
+				y = parseInt(String(args[2]));
+				k = parseInt(String(args[3]));
+			}else{
+				throw new ArgumentError('参数错误！(CMYKColor)或者(c,m,y,k)');
+			}
+			var cc:Number = MathHelper.Range(c, 0, 100) / 100;
+			var cm:Number = MathHelper.Range(m, 0, 100) / 100;
+			var cy:Number = MathHelper.Range(y, 0, 100) / 100;
+			var ck:Number = MathHelper.Range(k, 0, 100) / 100;
+			
+			var C3:Number = cc * (1 - ck) + 1 * ck;
+			if (C3>1) {C3=1;}
+			
+			var M3:Number = cm * (1 - ck) + 1 * ck;
+			if (M3>1) {M3=1;}
+			
+			var Y3:Number = cy * (1 - ck)+ 1 * ck;
+			if (Y3>1) {Y3=1;}
+			
+			var r:Number = 1 - C3;
+			var g:Number = 1 - M3;
+			var b:Number = 1 - Y3;
+			
+			return new RGBColor(NumToByte(r), NumToByte(g), NumToByte(b));
+		}
+		
+		private static function NumToByte(n:Number):uint {
+			return Math.round(n * 255);
+		}
+		private static function FindMinimum(C:Number ,M:Number ,Y:Number):Number {
+			var min:Number = 1;
+			if (C < min) { min = C }
+			if (M < min) { min = M }
+			if (Y < min) { min = Y }
+			return min;
+		}
+	}//end class
 }
+class pc{}

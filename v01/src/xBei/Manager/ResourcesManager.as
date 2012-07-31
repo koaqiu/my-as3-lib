@@ -55,7 +55,7 @@ package xBei.Manager
 				l.dataFormat = URLLoaderDataFormat.BINARY;
 				l.addEventListener(DataLoaderEvent.DATA_LOADED, DPE_LoadCompleted);
 				l.addEventListener(DataLoaderEvent.ERROR, DPE_LoadError);
-				l.Load(url);
+				l.Load(url, {'dataFormat': URLLoaderDataFormat.BINARY});
 			}else if(data.isLoading){
 				var tmp:Object = {
 					'interval':0,

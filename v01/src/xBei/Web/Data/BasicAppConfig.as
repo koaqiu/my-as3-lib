@@ -1,6 +1,10 @@
 package xBei.Web.Data {
 	import flash.display.LoaderInfo;
+	import flash.external.ExternalInterface;
+	import flash.utils.setTimeout;
 	
+	import xBei.Debug.Logger;
+	import xBei.Helper.StringHelper;
 	import xBei.Net.Uri;
 
 	/**
@@ -14,6 +18,11 @@ package xBei.Web.Data {
 		public function get Url():Uri{
 			return this._url;
 		}
+		private var _docUrl:Uri;
+		public function get DocumentUrl():Uri{
+			return this._docUrl;
+		}
+		
 		private static var _instance:BasicAppConfig;
 		/**
 		 * 静态唯一实例 
@@ -42,6 +51,15 @@ package xBei.Web.Data {
 					this[k] = glo.bal.INIT_SETTING[k];
 				}
 			}
+			
+			//检查宿主地址
+			if(ExternalInterface.available){
+				//ExternalInterface.marshallExceptions = true;
+				var documentUrl:String = ExternalInterface.call('location.toString');
+				if(!StringHelper.IsNullOrEmpty(documentUrl)){
+					this._docUrl = new Uri(documentUrl);
+				}
+			}
 		}
 		
 		/**
@@ -50,7 +68,7 @@ package xBei.Web.Data {
 		 * @see flash.display.LoaderInfo.parameters
 		 */
 		protected function processParameters():void{
-			
+			throw new Error('processParameters 未实现');
 		}
 		
 		/**

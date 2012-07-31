@@ -5,7 +5,7 @@
 	 * @author KoaQiu
 	 * 
 	 */
-	public class MyGC {
+	public final class MyGC {
 		/**
 		 * 回收垃圾 
 		 */

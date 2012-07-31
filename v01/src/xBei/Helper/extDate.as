@@ -7,6 +7,9 @@ package xBei.Helper {
 	 */
 	public class extDate{
 		private var _date:Date;
+		public function get DATE():Date{
+			return this._date;
+		}
 		public function extDate(year:* = null, month:* = null, date:* = null, hours:* = null, minutes:* = null, seconds:* = null, ms:* = null){
 			if(year is Date){
 				var d:Date = year as Date;

@@ -65,6 +65,10 @@
     <classEntry path="xBei.Helper.XSpriteHelper"/>
     <classEntry path="xBei.iterator.IIterator"/>
     <classEntry path="xBei.iterator.NullIterator"/>
+    <classEntry path="xBei.Drawing.Color"/>
+    <classEntry path="xBei.Drawing.RGBColor"/>
+    <classEntry path="xBei.Drawing.CMYKColor"/>
+    <classEntry path="xBei.Net.xbei_internal"/>
   </includeClasses>
   <includeResources/>
   <namespaceManifests/>
